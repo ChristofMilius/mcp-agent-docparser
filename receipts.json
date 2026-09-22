@@ -1,5 +1,5 @@
 {
-  "_comment": "docparser receipt registry — edit this file to add/update/remove receipts, or use the receipt_* MCP tools",
+  "_comment": "docparser receipt registry — edit this file to add/update/remove receipts",
   "_schema_version": "2",
   "receipts": {
     "memvid-python": {
@@ -18,8 +18,13 @@
         "body"
       ],
       "strip_tags": [
-        "nav", "footer", "header", "script", "style",
-        ".headerlink", "[data-floating-buttons]"
+        "nav",
+        "footer",
+        "header",
+        "script",
+        "style",
+        ".headerlink",
+        "[data-floating-buttons]"
       ],
       "section": null,
       "js_render": false,
@@ -50,7 +55,12 @@
         "body"
       ],
       "strip_tags": [
-        "nav", "footer", "header", "script", "style", ".anchor"
+        "nav",
+        "footer",
+        "header",
+        "script",
+        "style",
+        ".anchor"
       ],
       "section": null,
       "js_render": true,
@@ -58,6 +68,23 @@
       "notes": "Custom Next.js site. Static HTML also serves .prose content, but js_render + markdown_passthrough yields the cleanest output via its Copy-as-Markdown button.",
       "last_fetched": null,
       "last_output": null
+    },
+    "opencode-docs-plugins": {
+      "name": "OpenCode Docs - Plugins",
+      "language": "english",
+      "urls": [
+        "https://opencode.ai/docs/plugins/"
+      ],
+      "selectors": [
+        "main"
+      ],
+      "strip_tags": null,
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Probed 2026-09-22: static Astro docs, main selector matches, H2s: Use a plugin / Create a plugin / Examples",
+      "last_fetched": "2026-09-22",
+      "last_output": "opencode_docs_plugins_20260922_221731.md"
     }
   }
 }
