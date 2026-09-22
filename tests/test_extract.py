@@ -76,6 +76,35 @@ class TestExtract:
         assert "**already markdown**" in md
         assert "- item" in md
 
+    def test_passthrough_cleans_crlf_hash_tokens(self):
+        html = (
+            "<div><pre>Use a skill [#use-a-skill]\r\n"
+            "Skills give Bionic reusable guidance.\r\n"
+            "Create a skill [#create-a-skill]\r\n"
+            "Ask Bionic.\r\n"
+            "## Tips [#tips]\r\n"
+            "Short advice.\r\n</pre></div>"
+        )
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["body"],
+            "strip_tags": [], "section": None, "markdown_passthrough": True,
+        })
+        assert "Use a skill" in md
+        assert "[#use-a-skill]" not in md
+        assert "## Tips" in md
+        assert "[#tips]" not in md
+        assert "\r" not in md
+
+    def test_passthrough_keeps_unrelated_bracketed_tokens(self):
+        # a trailing [?] is not an anchor slug, and a hash link in prose stays
+        html = "<div><pre>Docs [#docs] and [other]\n[Keep me](#anchor)\n</pre></div>"
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["body"],
+            "strip_tags": [], "section": None, "markdown_passthrough": True,
+        })
+        assert "Docs and [other]" in md or "Docs" in md
+        assert "[Keep me](#anchor)" in md
+
     def test_code_language_emitted_for_code_blocks(self):
         html = '<div id="content"><pre><code>print("hi")</code></pre></div>'
         md = extract_content(_soup(html), {

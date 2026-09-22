@@ -39,6 +39,25 @@ _HEADING_SELF_LINK_RE = re.compile(
     re.MULTILINE,
 )
 
+#: Trailing heading-anchor token in raw copy-markdown, e.g. "Use a skill [#use-a-skill]".
+_HEADING_HASH_TOKEN_RE = re.compile(r"^(.*?)\s+\[#([\w-]+)\]\s*$", re.MULTILINE)
+
+
+def _to_kebab(text: str) -> str:
+    """'Use a skill' → 'use-a-skill' (matches anchor slugs)."""
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def _strip_heading_hash_tokens(text: str) -> str:
+    """Drop trailing '[#anchor-slug]' tokens only when the slug matches the line text."""
+    def _repl(match: re.Match) -> str:
+        body, slug = match.group(1), match.group(2)
+        if _to_kebab(body) == slug:
+            return body
+        return match.group(0)
+
+    return _HEADING_HASH_TOKEN_RE.sub(_repl, text)
+
 
 def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     """
@@ -57,7 +76,8 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     # ---- Passthrough: content is already markdown (e.g. from Playwright clipboard) ----
     if receipt.get("markdown_passthrough"):
         pre = soup.find("pre")
-        return pre.get_text() if pre else soup.get_text()
+        text = pre.get_text() if pre else soup.get_text()
+        return _clean_passthrough(text)
 
     # ---- Selector walk ----
     content_block: Tag | None = None
@@ -108,6 +128,17 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     raw_md = _HEADING_ANCHOR_RE.sub("", raw_md)
     raw_md = _HEADING_SELF_LINK_RE.sub(r"\1\2", raw_md)
     return re.sub(r"\n{3,}", "\n\n", raw_md).strip()
+
+
+def _clean_passthrough(text: str) -> str:
+    """
+    Normalize raw copy-markdown (Playwright clipboard): CRLF → LF, trailing
+    [#anchor-slug] tokens off headings, whitespace-only line collapse.
+    """
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = _strip_heading_hash_tokens(text)
+    lines = [line.rstrip() for line in text.split("\n")]
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
 def _collapse_pre_blocks(content_block: Tag, soup: BeautifulSoup) -> None:
@@ -175,6 +206,7 @@ def _resolve_code_language(content_block: Tag, receipt: dict) -> str:
 
 __all__ = [
     "extract_content",
+    "_clean_passthrough",
     "_collapse_pre_blocks",
     "_detect_code_language",
     "_resolve_code_language",

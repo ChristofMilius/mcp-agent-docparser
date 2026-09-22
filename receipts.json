@@ -31,7 +31,8 @@
       "markdown_passthrough": false,
       "notes": "Mintlify site. Confirmed selector: #content.",
       "last_fetched": null,
-      "last_output": null
+      "last_output": null,
+      "code_language": null
     },
     "lmstudio-python": {
       "name": "LM Studio Python SDK",
@@ -67,7 +68,8 @@
       "markdown_passthrough": true,
       "notes": "Custom Next.js site. Static HTML also serves .prose content, but js_render + markdown_passthrough yields the cleanest output via its Copy-as-Markdown button.",
       "last_fetched": null,
-      "last_output": null
+      "last_output": null,
+      "code_language": null
     },
     "opencode-docs-plugins": {
       "name": "OpenCode Docs - Plugins",
@@ -106,7 +108,33 @@
       "markdown_passthrough": false,
       "notes": "Probed 2026-09-22: ReadTheDocs Sphinx theme, [role=main] is the content block, H2s carry a trailing pilcrow (Make a Request, Passing Parameters In URLs, ...)",
       "last_fetched": "2026-09-22",
-      "last_output": "requests_docs_quickstart_20260922_222545.md"
+      "last_output": "requests_docs_quickstart_20260922_222545.md",
+      "code_language": null
+    },
+    "lmstudio-bionic": {
+      "name": "LM Studio Bionic Docs",
+      "language": "english",
+      "urls": [
+        "https://lmstudio.ai/docs/bionic/agent/skills",
+        "https://lmstudio.ai/docs/bionic/agent/code-project",
+        "https://lmstudio.ai/docs/bionic/quick-start"
+      ],
+      "selectors": [
+        ".prose",
+        "article"
+      ],
+      "strip_tags": [
+        "nav",
+        "footer",
+        "header"
+      ],
+      "section": null,
+      "js_render": true,
+      "markdown_passthrough": true,
+      "notes": "Probed 2026-09-22: Bionic docs (Next.js), .prose/article match, Copy-as-Markdown button detected → js_render + markdown_passthrough. Human doc language english, code fences typescript.",
+      "code_language": "typescript",
+      "last_fetched": "2026-09-22",
+      "last_output": "lm_studio_bionic_docs_20260922_225039.md"
     }
   }
 }
