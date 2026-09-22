@@ -90,6 +90,22 @@ class TestReceiptTools:
         ))
         assert bad["status"] == "invalid"
 
+    def test_add_accepts_code_language(self, tools, ctx):
+        out = _parse(tools["receipt_add"](
+            key="code", name="Code", language="english",
+            urls=["https://x.dev"], selectors=["#content"],
+            code_language="typescript",
+        ))
+        assert out["status"] == "ok"
+        got = ctx.registry.get("code")
+        assert got["language"] == "english"
+        assert got["code_language"] == "typescript"
+
+    def test_edit_patches_code_language(self, tools, ctx):
+        out = _parse(tools["receipt_edit"](key="sample", updates={"code_language": "json"}))
+        assert out["status"] == "ok"
+        assert ctx.registry.get("sample")["code_language"] == "json"
+
     def test_edit_patches_fields(self, tools, ctx):
         out = _parse(tools["receipt_edit"](key="sample", updates={"notes": "edited", "js_render": True}))
         assert out["status"] == "ok"

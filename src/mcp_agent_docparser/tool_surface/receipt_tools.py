@@ -62,13 +62,21 @@ def register(server, ctx) -> None:
         js_render: bool = False,
         markdown_passthrough: bool = False,
         notes: str = "",
+        code_language: str | None = None,
     ) -> str:
         """
         Create a new receipt (or replace an existing one).
 
         Required: key, name, language, urls, selectors. Optional: strip_tags,
-        section, js_render, markdown_passthrough, notes. Validates before
-        writing; returns validation errors if the receipt is malformed.
+        section, js_render, markdown_passthrough, notes, code_language.
+        Validates before writing; returns validation errors if the receipt is
+        malformed.
+
+        `language` is the human language of the documentation. `code_language`
+        optionally overrides the ``` fence language when the page's blocks are
+        in another language (e.g. a React SDK doc in English that emits
+        TypeScript). When omitted, the fence language is auto-detected from the
+        page and falls back to `language` only if it names a code language.
         """
         try:
             receipt = {
@@ -81,6 +89,7 @@ def register(server, ctx) -> None:
                 "js_render": js_render,
                 "markdown_passthrough": markdown_passthrough,
                 "notes": notes,
+                "code_language": code_language,
                 "last_fetched": None,
                 "last_output": None,
             }
@@ -101,11 +110,13 @@ def register(server, ctx) -> None:
 
         `updates` is a JSON object of field → value. Allowed fields: name,
         language, urls, selectors, strip_tags, section, js_render,
-        markdown_passthrough, notes. Returns false if the key does not exist.
+        markdown_passthrough, notes, code_language. Returns false if the key
+        does not exist.
         """
         try:
             allowed = {"name", "language", "urls", "selectors", "strip_tags",
-                       "section", "js_render", "markdown_passthrough", "notes"}
+                       "section", "js_render", "markdown_passthrough", "notes",
+                       "code_language"}
             fields = {k: v for k, v in updates.items() if k in allowed}
             if not fields:
                 return json.dumps({"status": "no_fields", "allowed": sorted(allowed)}, indent=2)

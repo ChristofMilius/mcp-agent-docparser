@@ -102,3 +102,97 @@ class TestExtract:
         assert "pip install thing" in md
         assert "first part" not in md
         assert "later part" not in md
+
+
+class TestCodeFenceLanguage:
+    def test_human_language_does_not_taint_fence(self):
+        # "english" is a human language, not a code fence tag
+        html = '<div id="content"><pre><code>{"a": 1}\n{"b": 2}\n</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```english" not in md
+        assert "```\n" in md
+        assert "\"a\": 1" in md
+
+    def test_language_that_looks_like_code_used_for_fence(self):
+        html = '<div id="content"><pre><code>print("hi")</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "python", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```python" in md
+
+    def test_data_language_hint_wins_over_fallback(self):
+        html = '<div id="content"><pre data-language="json"><code>x</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```json" in md
+
+    def test_language_class_hint_wins_over_fallback(self):
+        html = '<div id="content"><pre><code class="language-typescript">x</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```typescript" in md
+
+    def test_explicit_code_language_overrides_page(self):
+        html = '<div id="content"><pre data-language="json"><code>x</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "english", "code_language": "yaml",
+            "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```yaml" in md
+        assert "```json" not in md
+
+
+class TestCodeBlockCollapse:
+    def test_ec_line_blocks_collapse_to_single_fence(self):
+        # expressive-code wraps every line in its own div — must not blank-line-separate
+        html = (
+            '<div id="content"><pre data-language="json"><code>'
+            '<div class="ec-line"><div class="code"><span>{</span></div></div>'
+            '<div class="ec-line"><div class="code"><span>"a": 1</span></div></div>'
+            '<div class="ec-line"><div class="code"><span>}</span></div></div>'
+            "</code></pre></div>"
+        )
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```json\n{\n\"a\": 1\n}\n```" in md
+
+    def test_plain_pre_untouched(self):
+        html = '<div id="content"><pre><code>a\nb\nc\n</code></pre></div>'
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```\na\nb\nc\n```" in md
+
+
+class TestHeadingAnchorStrip:
+    def test_sphinx_pilcrow_anchor_removed(self):
+        html = '<div id="content"><h2>Make a Request<a href="#make-a-request" title="Link to this heading">¶</a></h2></div>'
+        md = extract_content(_soup(html), {
+            "language": "text", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "## Make a Request" in md
+        assert "¶" not in md
+        assert "Link to this heading" not in md
+
+    def test_self_linking_heading_unwrapped(self):
+        html = '<div id="content"><h2><a href="#use-a-plugin">Use a plugin</a></h2><p>body</p></div>'
+        md = extract_content(_soup(html), {
+            "language": "text", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "## Use a plugin" in md
+        assert "#use-a-plugin" not in md
+        assert "body" in md

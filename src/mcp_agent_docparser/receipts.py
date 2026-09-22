@@ -28,6 +28,11 @@ _AUTO_KEYS: dict[str, object] = {
     "js_render":            False,
     "markdown_passthrough": False,
     "notes":                "",
+    #: Optional override for the ``` code-fence language. When absent, extract
+    #: auto-detects from the page or falls back to `language` if it names a
+    #: code language. Lets a receipt keep a human doc language (e.g. "english")
+    #: separate from the SDK code language ("typescript").
+    "code_language":        None,
     "last_fetched":         None,
     "last_output":          None,
 }
@@ -55,6 +60,9 @@ def _validate_receipt(key: str, receipt: dict) -> list[str]:
         errors.append("'selectors' must be a list")
     elif "selectors" in receipt and not receipt["selectors"]:
         errors.append("'selectors' must not be empty")
+    if "code_language" in receipt and receipt["code_language"] is not None \
+            and not isinstance(receipt["code_language"], str):
+        errors.append("'code_language' must be a string or null")
     return errors
 
 

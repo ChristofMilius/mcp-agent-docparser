@@ -78,13 +78,18 @@
       "selectors": [
         "main"
       ],
-      "strip_tags": null,
+      "strip_tags": [
+        "footer",
+        "select",
+        "nav"
+      ],
       "section": null,
       "js_render": false,
       "markdown_passthrough": false,
       "notes": "Probed 2026-09-22: static Astro docs, main selector matches, H2s: Use a plugin / Create a plugin / Examples",
       "last_fetched": "2026-09-22",
-      "last_output": "opencode_docs_plugins_20260922_221731.md"
+      "last_output": "opencode_docs_plugins_20260922_224019.md",
+      "code_language": "typescript"
     },
     "requests-quickstart": {
       "name": "Requests Docs - Quickstart",
@@ -101,7 +106,7 @@
       "markdown_passthrough": false,
       "notes": "Probed 2026-09-22: ReadTheDocs Sphinx theme, [role=main] is the content block, H2s carry a trailing pilcrow (Make a Request, Passing Parameters In URLs, ...)",
       "last_fetched": "2026-09-22",
-      "last_output": "requests_docs_quickstart_20260922_222006.md"
+      "last_output": "requests_docs_quickstart_20260922_222545.md"
     }
   }
 }

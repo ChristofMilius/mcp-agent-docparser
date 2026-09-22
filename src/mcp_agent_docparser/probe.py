@@ -23,6 +23,25 @@ _PROBE_SELECTORS = [
     "[class*='article']", "[class*='doc-content']",
 ]
 
+#: Elements that are almost always page furniture, not documentation. Reporter
+#: lists which of these appear inside the matched content block so a receipt's
+#: strip_tags can target them (e.g. a docs site whose footer/select language
+#: picker leaks into <main>).
+_NOISE_SELECTORS = [
+    "footer",
+    "select",
+    "nav",
+    "form",
+    ".language-selector",
+    "[class*='language-switcher']",
+    "[aria-label*='language' i]",
+    ".pagination",
+    "[class*='pagination']",
+    ".toc",
+    "[class*='sidebar']",
+    "[class*='breadcrumb']",
+]
+
 
 def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
     """
@@ -47,20 +66,26 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
 
     h2s: list[str] = []
     links: list[str] = []
+    noise: list[dict] = []
     if first_match is not None:
         h2s = [h.get_text().strip()[:70] for h in first_match.find_all("h2")][:15]
         links = [a["href"] for a in first_match.find_all("a", href=True)
                  if a["href"].startswith("http")][:10]
+        for sel in _NOISE_SELECTORS:
+            count = len(first_match.select(sel))
+            if count:
+                noise.append({"selector": sel, "count": count})
     else:
         logger.warning("No selector matched for probe — page may be JS-rendered.")
 
     return {
-        "hits":          hits,
-        "misses":        misses,
-        "hit_details":   hit_details,
-        "h2s":           h2s,
-        "links":         links,
-        "best_selector": hits[0] if hits else None,
+        "hits":             hits,
+        "misses":           misses,
+        "hit_details":      hit_details,
+        "h2s":              h2s,
+        "links":            links,
+        "noise_candidates": noise,
+        "best_selector":    hits[0] if hits else None,
     }
 
 
@@ -139,4 +164,4 @@ def probe_url_js(url: str) -> dict | None:
     return findings
 
 
-__all__ = ["probe_url", "probe_url_js", "_PROBE_SELECTORS"]
+__all__ = ["probe_url", "probe_url_js", "_PROBE_SELECTORS", "_NOISE_SELECTORS"]

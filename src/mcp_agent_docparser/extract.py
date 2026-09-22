@@ -12,6 +12,33 @@ import re
 import markdownify
 from bs4 import BeautifulSoup, Tag
 
+#: Class markers like language-python / language-json on <code> elements.
+_CODE_LANG_CLASS_RE = re.compile(r"language-([a-zA-Z0-9#+_-]+)")
+
+#: Tokens that unambiguously name a *code* language (not a human language
+#: like "english"). Used as a fallback when a receipt carries no explicit
+#: code_language and the page offers no data-language / language-* hint.
+_TRAILING_CODE_LANGS = {
+    "python", "py", "python3", "js", "javascript", "node", "typescript", "ts",
+    "json", "jsonc", "bash", "sh", "shell", "zsh", "powershell", "ps1",
+    "go", "golang", "rust", "c", "cpp", "c++", "csharp", "java", "kotlin",
+    "ruby", "php", "swift", "sql", "html", "css", "scss", "yaml", "yml",
+    "toml", "makefile", "dockerfile", "markdown", "md", "text", "plaintext",
+    "none",
+}
+
+#: Self-referenced heading anchors (e.g. Sphinx "[¶](#quickstart ...)").
+#: Matches the inline link only — the newline(s) after it stay so the heading
+#: keeps its own line instead of gluing to the following paragraph.
+_HEADING_ANCHOR_RE = re.compile(r"\[[¶^]\]\(#[^)]*\)")
+
+#: Markdown heading line → unwrap self-referencing links: "[Use a plugin](#use-a-plugin)"
+#: becomes plain "Use a plugin" (Astro/mdx docs wrap heading text in the anchor link).
+_HEADING_SELF_LINK_RE = re.compile(
+    r"^(\s*#+\s*)\[([^\]]+)\]\(#[^\s)]*(?:\s+\"[^\"]*\")?\)\s*$",
+    re.MULTILINE,
+)
+
 
 def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     """
@@ -21,9 +48,11 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
       1. If markdown_passthrough is set, treat the first <pre> as raw markdown.
       2. Walk the selector list — first CSS selector that matches wins.
       3. Remove strip_tags elements in place.
-      4. Optionally restrict to a named H2 section.
-      5. Convert HTML → markdown via markdownify.
-      6. Collapse excessive blank lines.
+      4. Collapse expressive-code <pre> blocks into plain line text.
+      5. Resolve the code-fence language (explicit, detected, or fallback).
+      6. Optionally restrict to a named H2 section.
+      7. Convert HTML → markdown via markdownify.
+      8. Strip heading-anchor noise and collapse excessive blank lines.
     """
     # ---- Passthrough: content is already markdown (e.g. from Playwright clipboard) ----
     if receipt.get("markdown_passthrough"):
@@ -45,6 +74,12 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     for selector in receipt.get("strip_tags") or []:
         for element in content_block.select(selector):
             element.decompose()
+
+    # ---- Collapse expressive-code <pre> blocks (ec-line divs → plain lines) ----
+    _collapse_pre_blocks(content_block, soup)
+
+    # ---- Code-fence language: explicit > detected > plausible fallback > bare ----
+    fence_language = _resolve_code_language(content_block, receipt)
 
     # ---- Optional H2 section filter ----
     section_filter: str | None = receipt.get("section")
@@ -68,9 +103,80 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
         html_fragment,
         heading_style="ATX",
         bullets="-",
-        code_language=receipt["language"],
+        code_language=fence_language,
     )
+    raw_md = _HEADING_ANCHOR_RE.sub("", raw_md)
+    raw_md = _HEADING_SELF_LINK_RE.sub(r"\1\2", raw_md)
     return re.sub(r"\n{3,}", "\n\n", raw_md).strip()
 
 
-__all__ = ["extract_content"]
+def _collapse_pre_blocks(content_block: Tag, soup: BeautifulSoup) -> None:
+    """
+    Rebuild <pre> blocks whose lines are wrapped in individual divs
+    (expressive-code ".ec-line") as one <pre><code> block of plain lines.
+
+    Without this, markdownify emits a blank line between every code line
+    (each ec-line div becomes its own paragraph).
+    """
+    for pre in content_block.find_all("pre"):
+        code = pre.find("code") or pre
+        line_els = code.select(".ec-line") or code.select(".line")
+        if not line_els:
+            continue
+        text = "\n".join(el.get_text() for el in line_els) + "\n"
+
+        new_pre = soup.new_tag("pre")
+        for attr, value in pre.attrs.items():
+            new_pre[attr] = value
+        new_code = soup.new_tag("code")
+        new_code.string = text
+        new_pre.append(new_code)
+        pre.replace_with(new_pre)
+
+
+def _detect_code_language(content_block: Tag) -> str | None:
+    """Collect data-language / language-* hints from <pre>/<code>; most common wins."""
+    mentions: dict[str, int] = {}
+    for pre in content_block.find_all("pre"):
+        hint = pre.get("data-language")
+        if hint:
+            mentions[str(hint)] = mentions.get(str(hint), 0) + 1
+        for code in pre.find_all("code"):
+            for cls in code.get("class") or []:
+                match = _CODE_LANG_CLASS_RE.match(cls)
+                if match:
+                    lang = match.group(1)
+                    mentions[lang] = mentions.get(lang, 0) + 1
+    if not mentions:
+        return None
+    return max(mentions, key=mentions.get)
+
+
+def _resolve_code_language(content_block: Tag, receipt: dict) -> str:
+    """
+    Pick the language used for ``` fences.
+
+    Priority: explicit receipt `code_language` field, then page-detected
+    data-language / language-* hints, then the receipt `language` *only when
+    it names a code language* (not a human language like "english"). Empty
+    string renders a bare ``` fence.
+    """
+    explicit = receipt.get("code_language")
+    if explicit:
+        return explicit
+    detected = _detect_code_language(content_block)
+    if detected:
+        return detected
+    lang = (receipt.get("language") or "").strip()
+    if lang.lower() in _TRAILING_CODE_LANGS:
+        return lang
+    return ""
+
+
+__all__ = [
+    "extract_content",
+    "_collapse_pre_blocks",
+    "_detect_code_language",
+    "_resolve_code_language",
+    "_TRAILING_CODE_LANGS",
+]
