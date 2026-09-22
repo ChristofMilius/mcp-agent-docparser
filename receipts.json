@@ -378,6 +378,32 @@
       "code_language": "python",
       "last_fetched": "2026-09-22",
       "last_output": "langchain_deepagents_docs_20260922_234110.md"
+    },
+    "react-dev-docs": {
+      "name": "React.dev Learn Docs",
+      "language": "english",
+      "urls": [
+        "https://react.dev/learn/tutorial-tic-tac-toe",
+        "https://react.dev/learn/state-a-components-memory",
+        "https://react.dev/learn/describing-the-ui"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "nav",
+        "footer",
+        "div[class*='justify-between']",
+        "button[aria-label*='Copy']"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "React.dev tutorial docs. Sandpack embeds multi-file code panels (App.js/index.js) in one pre. Tailwind MDX theme, selector article.",
+      "code_language": "jsx",
+      "last_fetched": "2026-09-22",
+      "last_output": "react_dev_learn_docs_20260922_234610.md"
     }
   }
 }
