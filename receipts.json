@@ -233,6 +233,31 @@
       "code_language": "mojo",
       "last_fetched": "2026-09-22",
       "last_output": "mojo_docs_20260922_233037.md"
+    },
+    "rust-docs": {
+      "name": "Rust Docs",
+      "language": "english",
+      "urls": [
+        "https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html",
+        "https://doc.rust-lang.org/book/ch13-01-closures.html",
+        "https://doc.rust-lang.org/cargo/reference/profiles.html"
+      ],
+      "selectors": [
+        "main",
+        ".content"
+      ],
+      "strip_tags": [
+        "nav",
+        "footer",
+        "#menu"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Rust's own docs (doc.rust-lang.org): The Book, Reference, Cargo guide. Selector main/.content. code_language=rust (markdownify ignores language-* classes).",
+      "code_language": "rust",
+      "last_fetched": "2026-09-22",
+      "last_output": "rust_docs_20260922_233530.md"
     }
   }
 }
