@@ -45,6 +45,7 @@ sticks for everyone.
 | Footer / nav / language-selector text leaked into content | well-chosen `#id` selector still contains page furniture | `strip_tags` per receipt; `probe` now reports `noise_candidates` (footer/select/nav/…) inside the matched block so the ideal selector is caught up front |
 | Headings full of `[¶](#quickstart "Link to this heading")` (Sphinx) or `## [Use a plugin](#use-a-plugin)` (Astro) | markdownify keeps self-referencing heading anchor links | `_HEADING_ANCHOR_RE` strips `[¶](…)` without eating the newline (headers must not glue to the next paragraph); `_HEADING_SELF_LINK_RE` unwraps `[Text](#slug)` → `Text` with `re.MULTILINE` |
 | Raw copy-markdown page has `\r\n` line endings and trailing `[#use-a-skill]` on headings | Playwright clipboard returns CRLF, and the site ships markdown with anchor-slug tokens | `_clean_passthrough()` → CRLF→LF, rstrip lines, collapse 3+ blank lines, and `_strip_heading_hash_tokens()` drops `[#slug]` **only when** the kebab-case of the line text matches the slug (prose `[#…]` links survive) |
+| Mojibake in static fetches — `BokmÃ¥l`, `YouTubeâ€'s` | `requests .text` decodes with its default ISO-8859-1 when the server sends no `charset=` in Content-Type; UTF-8 bytes get misread as Latin-1 | `_decode_body()` in fetch.py: honor a charset **explicitly declared in the header** (parsed via `_CONTENT_CHARSET_RE`, NOT `get_encoding_from_headers`, which itself defaults to ISO-8859-1), else try strict UTF-8, then `apparent_encoding`, then replacement Latin-1 |
 
 ## Diagnosis recipe
 
@@ -77,6 +78,9 @@ Feed that through `extract_content()` with a passthrough receipt and inspect.
   there glues the heading onto the following paragraph.
 - `markdownify(code_language=None)` renders ` ```None ` — pass `""` for a bare
   fence, never `None`.
+- **Explicit test-encoding traps:** a hypothetical latin-1 page may not have a
+  charset declared; validate against *declared* charsets (header regex), not
+  `requests` `.encoding` heuristic, which silently reports ISO-8859-1.
 - Windows: `python -c` chokes on `\"` quoting — write scratch files; set
   `$env:PYTHONIOENCODING='utf-8'` before printing Unicode (cp1252 console).
 - **MCP server stale module:** the server subprocess loads the package once.

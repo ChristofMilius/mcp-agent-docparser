@@ -135,6 +135,56 @@
       "code_language": "typescript",
       "last_fetched": "2026-09-22",
       "last_output": "lm_studio_bionic_docs_20260922_225039.md"
+    },
+    "invidious-docs": {
+      "name": "Invidious Docs",
+      "language": "english",
+      "urls": [
+        "https://docs.invidious.io/captcha-bug/",
+        "https://docs.invidious.io/api/authenticated-endpoints/",
+        "https://docs.invidious.io/url-parameters/"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "footer",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "",
+      "code_language": null,
+      "last_fetched": "2026-09-22",
+      "last_output": "invidious_docs_20260922_230843.md"
+    },
+    "searxng-docs": {
+      "name": "SearXNG Docs",
+      "language": "english",
+      "urls": [
+        "https://docs.searxng.org/user/search-syntax.html",
+        "https://docs.searxng.org/admin/searx.limiter.html",
+        "https://docs.searxng.org/dev/search_api.html"
+      ],
+      "selectors": [
+        "[role='main']",
+        "article",
+        ".content"
+      ],
+      "strip_tags": [
+        "footer",
+        "aside",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "",
+      "code_language": null,
+      "last_fetched": "2026-09-22",
+      "last_output": "searxng_docs_20260922_230843.md"
     }
   }
 }

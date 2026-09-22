@@ -8,6 +8,7 @@ the logging module instead of printing (stdio must stay clean).
 from __future__ import annotations
 
 import logging
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -28,10 +29,52 @@ def fetch_static(url: str) -> BeautifulSoup | None:
     try:
         response = requests.get(url, headers=_REQUEST_HEADERS, timeout=15)
         response.raise_for_status()
-        return BeautifulSoup(response.text, "html.parser")
+        return BeautifulSoup(_decode_body(response), "html.parser")
     except requests.RequestException as exc:
         logger.error("Fetch error [%s]: %s", url, exc)
         return None
+
+
+#: Explicit charset parameter in a Content-Type header, e.g. "text/html; charset=utf-8".
+_CONTENT_CHARSET_RE = re.compile(r"charset=([\w.\-]+)", re.IGNORECASE)
+
+
+def _declared_charset(response: requests.Response) -> str | None:
+    """
+    Return the charset explicitly written in the Content-Type header, or None.
+
+    We do NOT trust requests' get_encoding_from_headers() for this: it falls
+    back to 'ISO-8859-1' for any text/* without a charset, which is exactly
+    the state we must distinguish from an explicit declaration.
+    """
+    content_type = response.headers.get("Content-Type", "")
+    match = _CONTENT_CHARSET_RE.search(content_type)
+    return match.group(1) if match else None
+
+
+def _decode_body(response: requests.Response) -> str:
+    """
+    Decode response bytes with a sane charset strategy.
+
+    requests falls back to ISO-8859-1 when the Content-Type carries no
+    charset, which mangles UTF-8 docs ('' → 'â\x80\x99', 'ø' → 'Ã¸').
+    Strategy: honor a charset explicitly declared in the response headers;
+    otherwise decode UTF-8 strictly and fall back to the apparent encoding
+    only if that fails (i.e. the page really is Latin-1).
+    """
+    if _declared_charset(response):
+        return response.text
+
+    content = response.content
+    try:
+        return content.decode("utf-8")
+    except UnicodeDecodeError:
+        if response.apparent_encoding:
+            try:
+                return content.decode(response.apparent_encoding)
+            except (UnicodeDecodeError, LookupError):
+                pass
+    return content.decode("iso-8859-1", errors="replace")
 
 
 def fetch_js(url: str) -> BeautifulSoup | None:
@@ -100,4 +143,4 @@ def fetch(url: str, js_render: bool = False) -> BeautifulSoup | None:
     return fetch_static(url)
 
 
-__all__ = ["fetch", "fetch_static", "fetch_js", "_REQUEST_HEADERS"]
+__all__ = ["fetch", "fetch_static", "fetch_js", "_decode_body", "_declared_charset", "_REQUEST_HEADERS"]
