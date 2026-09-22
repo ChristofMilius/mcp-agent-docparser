@@ -258,6 +258,126 @@
       "code_language": "rust",
       "last_fetched": "2026-09-22",
       "last_output": "rust_docs_20260922_233530.md"
+    },
+    "mcp-spec": {
+      "name": "MCP Specification",
+      "language": "english",
+      "urls": [
+        "https://modelcontextprotocol.io/specification/2025-06-18/server/tools",
+        "https://modelcontextprotocol.io/specification/2025-06-18/basic/transports",
+        "https://modelcontextprotocol.io/specification/2025-06-18/architecture"
+      ],
+      "selectors": [
+        "#content",
+        ".prose",
+        "main"
+      ],
+      "strip_tags": [
+        "nav",
+        "footer"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Official MCP protocol spec (modelcontextprotocol.io, Mintlify-style MDX). Versioned URLs: /specification/<date>/server/tools, /basic/transports, /architecture. Selector #content.",
+      "code_language": "json",
+      "last_fetched": "2026-09-22",
+      "last_output": "mcp_specification_20260922_234133.md"
+    },
+    "smolagents-docs": {
+      "name": "HuggingFace smolagents Docs",
+      "language": "english",
+      "urls": [
+        "https://huggingface.co/docs/smolagents/en/index",
+        "https://huggingface.co/docs/smolagents/en/guided_tour",
+        "https://huggingface.co/docs/smolagents/en/tutorials/building_good_agents"
+      ],
+      "selectors": [
+        ".prose",
+        "main"
+      ],
+      "strip_tags": [
+        "footer",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "HF smolagents code-agent framework. HF docs theme (.prose selector). /en/ paths.",
+      "code_language": "python",
+      "last_fetched": "2026-09-22",
+      "last_output": "huggingface_smolagents_docs_20260922_234109.md"
+    },
+    "pydantic-ai-docs": {
+      "name": "Pydantic AI Docs",
+      "language": "english",
+      "urls": [
+        "https://ai.pydantic.dev/agents/",
+        "https://ai.pydantic.dev/tools/",
+        "https://ai.pydantic.dev/mcp/"
+      ],
+      "selectors": [
+        "main"
+      ],
+      "strip_tags": [
+        "footer"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Pydantic AI agent framework (Astro theme, selector main; footer/pagination noise).",
+      "code_language": "python",
+      "last_fetched": "2026-09-22",
+      "last_output": "pydantic_ai_docs_20260922_234110.md"
+    },
+    "google-adk-docs": {
+      "name": "Google ADK Docs",
+      "language": "english",
+      "urls": [
+        "https://adk.dev/agents/",
+        "https://adk.dev/mcp/",
+        "https://adk.dev/get-started/python/"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "footer",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Google Agent Development Kit (Material for MkDocs, selector article; adk.dev canonical).",
+      "code_language": "python",
+      "last_fetched": "2026-09-22",
+      "last_output": "google_adk_docs_20260922_234109.md"
+    },
+    "langchain-deepagents": {
+      "name": "LangChain DeepAgents Docs",
+      "language": "english",
+      "urls": [
+        "https://docs.langchain.com/oss/python/deepagents/overview",
+        "https://docs.langchain.com/oss/python/deepagents/skills",
+        "https://docs.langchain.com/oss/python/deepagents/memory"
+      ],
+      "selectors": [
+        "#content",
+        ".prose",
+        "main"
+      ],
+      "strip_tags": [
+        "nav",
+        "footer"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "LangChain's deepagents (OSS Python). Mintlify MDX theme, selector #content.",
+      "code_language": "python",
+      "last_fetched": "2026-09-22",
+      "last_output": "langchain_deepagents_docs_20260922_234110.md"
     }
   }
 }
