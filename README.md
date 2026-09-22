@@ -147,6 +147,17 @@ uv run pytest -q
 Tests cover the receipt registry, config path resolution, extraction, the
 parse pipeline (mocked fetch), and the full tool surface — no network needed.
 
+## Agent skill: fixing noisy fetched pages
+
+When a fetched page comes out malformed (wrong code-fence language, blank
+lines in code blocks, leaked navigation noise, heading-anchor junk, CRLF
+copy-markdown), opencode loads the **`docparser-page-fixes`** skill from
+`.opencode/skills/docparser-page-fixes/SKILL.md`. It teaches the
+reproduce → isolate → fix → test → restart loop, maps the real
+symptom/cause/fix cases from this repo's history, and lists the extractor's
+gotchas (MULTILINE regexes, trailing-newline traps, the stale-MCP-module
+restart requirement). Extend it whenever the extractor grows a new fix.
+
 ## License
 
 MIT © 2026 Christof Milius
