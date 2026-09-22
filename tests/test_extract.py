@@ -204,6 +204,21 @@ class TestCodeBlockCollapse:
         })
         assert "```\na\nb\nc\n```" in md
 
+    def test_docusaurus_token_line_blocks_collapse_to_single_fence(self):
+        # Docusaurus Prism wraps every code line in div.token-line with a <br/>
+        html = (
+            '<div id="content"><pre class="prism-code language-python"><code>'
+            '<div class="token-line"><span class="token keyword">def</span> main():<br/></div>'
+            '<div class="token-line"><span class="token plain">    return 1</span><br/></div>'
+            "</code></pre></div>"
+        )
+        md = extract_content(_soup(html), {
+            "language": "english", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "```python\ndef main():\n    return 1\n```" in md
+        assert "```python\ndef main():\n\n    return 1" not in md
+
 
 class TestHeadingAnchorStrip:
     def test_sphinx_pilcrow_anchor_removed(self):

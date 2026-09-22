@@ -208,7 +208,31 @@
       "notes": "",
       "code_language": null,
       "last_fetched": "2026-09-22",
-      "last_output": "hermes_agent_docs_20260922_231703.md"
+      "last_output": "hermes_agent_docs_20260922_232143.md"
+    },
+    "mojo-docs": {
+      "name": "Mojo Docs",
+      "language": "english",
+      "urls": [
+        "https://docs.modular.com/mojo/manual/get-started/",
+        "https://docs.modular.com/mojo/manual/python-to-mojo/",
+        "https://docs.modular.com/mojo/faq/"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "footer",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Docusaurus site. Manual pages live under Mojo/docs/site/manual/*.mdx in the modular/modular repo. code_language=mojo because markdownify ignores language-* fence classes.",
+      "code_language": "mojo",
+      "last_fetched": "2026-09-22",
+      "last_output": "mojo_docs_20260922_233037.md"
     }
   }
 }

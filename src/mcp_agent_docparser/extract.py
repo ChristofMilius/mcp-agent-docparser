@@ -146,14 +146,19 @@ def _clean_passthrough(text: str) -> str:
 def _collapse_pre_blocks(content_block: Tag, soup: BeautifulSoup) -> None:
     """
     Rebuild <pre> blocks whose lines are wrapped in individual divs
-    (expressive-code ".ec-line") as one <pre><code> block of plain lines.
+    (expressive-code ".ec-line", Docusaurus Prism ".token-line") as one
+    <pre><code> block of plain lines.
 
     Without this, markdownify emits a blank line between every code line
-    (each ec-line div becomes its own paragraph).
+    (each wrapper div becomes its own paragraph).
     """
     for pre in content_block.find_all("pre"):
         code = pre.find("code") or pre
-        line_els = code.select(".ec-line") or code.select(".line")
+        line_els = (
+            code.select(".ec-line")
+            or code.select(".line")
+            or code.select(".token-line")
+        )
         if not line_els:
             continue
         text = "\n".join(el.get_text() for el in line_els) + "\n"
@@ -174,8 +179,9 @@ def _detect_code_language(content_block: Tag) -> str | None:
         hint = pre.get("data-language")
         if hint:
             mentions[str(hint)] = mentions.get(str(hint), 0) + 1
-        for code in pre.find_all("code"):
-            for cls in code.get("class") or []:
+        # Docusaurus Prism puts "language-mojo" on the <pre>, not the <code>
+        for node in (pre, *pre.find_all("code")):
+            for cls in node.get("class") or []:
                 match = _CODE_LANG_CLASS_RE.match(cls)
                 if match:
                     lang = match.group(1)
