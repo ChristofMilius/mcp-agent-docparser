@@ -27,10 +27,12 @@ _TRAILING_CODE_LANGS = {
     "none",
 }
 
-#: Self-referenced heading anchors (e.g. Sphinx "[¶](#quickstart ...)").
-#: Matches the inline link only — the newline(s) after it stay so the heading
-#: keeps its own line instead of gluing to the following paragraph.
-_HEADING_ANCHOR_RE = re.compile(r"\[[¶^]\]\(#[^)]*\)")
+#: Self-referenced heading anchors — Sphinx/MkDocs "[¶](#quickstart ...)" and
+#: Docusaurus "[​](#quickstart ... "Direct link to ...")" (a zero-width space
+#: U+200B as the link text). Matches the inline link only — the newline(s)
+#: after it stay so the heading keeps its own line instead of gluing to the
+#: following paragraph.
+_HEADING_ANCHOR_RE = re.compile(r"\[[¶^\u200b]\]\(#[^)]*\)")
 
 #: Markdown heading line → unwrap self-referencing links: "[Use a plugin](#use-a-plugin)"
 #: becomes plain "Use a plugin" (Astro/mdx docs wrap heading text in the anchor link).

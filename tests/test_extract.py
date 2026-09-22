@@ -216,6 +216,17 @@ class TestHeadingAnchorStrip:
         assert "¶" not in md
         assert "Link to this heading" not in md
 
+    def test_docusaurus_zwsp_heading_anchor_removed(self):
+        # Docusaurus marks heading anchors with a zero-width space (U+200B).
+        html = '<div id="content"><h2>Using Skills<a href="#using-skills" title="Direct link to Using Skills">\u200b</a></h2></div>'
+        md = extract_content(_soup(html), {
+            "language": "text", "selectors": ["#content"],
+            "strip_tags": [], "section": None, "markdown_passthrough": False,
+        })
+        assert "## Using Skills" in md
+        assert "\u200b" not in md
+        assert "#using-skills" not in md
+
     def test_self_linking_heading_unwrapped(self):
         html = '<div id="content"><h2><a href="#use-a-plugin">Use a plugin</a></h2><p>body</p></div>'
         md = extract_content(_soup(html), {

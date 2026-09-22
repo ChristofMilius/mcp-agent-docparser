@@ -185,6 +185,30 @@
       "code_language": null,
       "last_fetched": "2026-09-22",
       "last_output": "searxng_docs_20260922_230843.md"
+    },
+    "hermes-agent-docs": {
+      "name": "Hermes Agent Docs",
+      "language": "english",
+      "urls": [
+        "https://hermes-agent.nousresearch.com/docs/user-guide/features/skills",
+        "https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp",
+        "https://hermes-agent.nousresearch.com/docs/developer-guide/architecture"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "footer",
+        "nav"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "",
+      "code_language": null,
+      "last_fetched": "2026-09-22",
+      "last_output": "hermes_agent_docs_20260922_231703.md"
     }
   }
 }
