@@ -1,0 +1,63 @@
+{
+  "_comment": "docparser receipt registry — edit this file to add/update/remove receipts, or use the receipt_* MCP tools",
+  "_schema_version": "2",
+  "receipts": {
+    "memvid-python": {
+      "name": "Memvid Python SDK",
+      "language": "python",
+      "urls": [
+        "https://docs.memvid.com/python-sdk/overview",
+        "https://docs.memvid.com/python-sdk/querying"
+      ],
+      "selectors": [
+        "#content",
+        ".prose",
+        "article",
+        "main",
+        "[role='main']",
+        "body"
+      ],
+      "strip_tags": [
+        "nav", "footer", "header", "script", "style",
+        ".headerlink", "[data-floating-buttons]"
+      ],
+      "section": null,
+      "js_render": false,
+      "markdown_passthrough": false,
+      "notes": "Mintlify site. Confirmed selector: #content.",
+      "last_fetched": null,
+      "last_output": null
+    },
+    "lmstudio-python": {
+      "name": "LM Studio Python SDK",
+      "language": "python",
+      "urls": [
+        "https://lmstudio.ai/docs/python/getting-started/project-setup",
+        "https://lmstudio.ai/docs/python/llm-prediction/chat-completion",
+        "https://lmstudio.ai/docs/python/llm-prediction/image-input",
+        "https://lmstudio.ai/docs/python/llm-prediction/cancelling-predictions",
+        "https://lmstudio.ai/docs/python/llm-prediction/structured-response",
+        "https://lmstudio.ai/docs/python/llm-prediction/speculative-decoding",
+        "https://lmstudio.ai/docs/python/llm-prediction/completion",
+        "https://lmstudio.ai/docs/python/llm-prediction/parameters",
+        "https://lmstudio.ai/docs/python/llm-prediction/working-with-chats",
+        "https://lmstudio.ai/docs/python/agent/act",
+        "https://lmstudio.ai/docs/python/agent/tools",
+        "https://lmstudio.ai/docs/python/embedding"
+      ],
+      "selectors": [
+        "div",
+        "body"
+      ],
+      "strip_tags": [
+        "nav", "footer", "header", "script", "style", ".anchor"
+      ],
+      "section": null,
+      "js_render": true,
+      "markdown_passthrough": true,
+      "notes": "Custom Next.js site. Static HTML also serves .prose content, but js_render + markdown_passthrough yields the cleanest output via its Copy-as-Markdown button.",
+      "last_fetched": null,
+      "last_output": null
+    }
+  }
+}

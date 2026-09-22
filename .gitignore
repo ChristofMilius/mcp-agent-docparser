@@ -1,0 +1,20 @@
+# Ignore everything by default
+*
+# Whitelist: un-ignore exactly what is versioned
+!.gitignore
+!pyproject.toml
+!README.md
+!LICENSE
+!uv.lock
+!receipts.json
+!src/
+!src/**
+!tests/
+!tests/**
+# Generated artifacts stay ignored even inside whitelisted trees
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+logs/
+doc_output/
