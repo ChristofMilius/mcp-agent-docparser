@@ -25,10 +25,15 @@ harness (Claude, opencode, etc.) over stdio.
 
 A **receipt** is a named profile that tells docparser how to fetch and
 extract one documentation site. Receipts live in `receipts.json` — never in
-the Python source. The repo ships two prefilled examples: **Memvid**
-(`memvid-python`, static Mintlify) and **LM Studio** (`lmstudio-python`,
-JS-rendered Next.js with a Copy-as-Markdown button). Delete them or keep
-them; they are regular receipts.
+the Python source. The repo ships a host of prefilled examples covering a
+wide range of real documentation stacks: **Memvid** (`memvid-python`, static
+Mintlify), **LM Studio** (`lmstudio-python` and `lmstudio-bionic`,
+JS-rendered Next.js with a Copy-as-Markdown button), **Mojo**, **Rust**,
+**React.dev** (Sandpack), **Hermes Agent**, **MCP Specification**, **Pydantic
+AI**, **HuggingFace smolagents**, **Google ADK**, **LangChain DeepAgents**,
+**Invidious** and **SearXNG** — see the `urls`, `selectors`, and `strip_tags`
+in `receipts.json` for ready-made examples per site theme. Delete them or
+keep them; they are regular receipts.
 
 ### Receipt schema
 
