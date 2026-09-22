@@ -58,6 +58,15 @@ class TestExtract:
         assert "noise" not in md
         assert "junk footer" not in md
 
+    def test_strip_tags_none_means_noop(self):
+        # receipt_add stores strip_tags=None when omitted; must not crash
+        html = '<div id="content"><script>s</script><p>keep me</p></div>'
+        md = extract_content(_soup(html), {
+            "language": "text", "selectors": ["#content"],
+            "strip_tags": None, "section": None, "markdown_passthrough": False,
+        })
+        assert "keep me" in md
+
     def test_markdown_passthrough_uses_pre(self):
         html = "<div><pre>**already markdown**\n- item\n</pre></div>"
         md = extract_content(_soup(html), {

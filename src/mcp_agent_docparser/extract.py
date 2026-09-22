@@ -42,7 +42,7 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
         return "_No content block matched any selector for this page._\n"
 
     # ---- Strip noise ----
-    for selector in receipt.get("strip_tags", []):
+    for selector in receipt.get("strip_tags") or []:
         for element in content_block.select(selector):
             element.decompose()
 
