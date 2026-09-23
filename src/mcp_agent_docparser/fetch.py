@@ -27,10 +27,12 @@ _REQUEST_HEADERS = {
 
 #: Button selectors for the "Copy as Markdown" strategy, tried in order.
 #: Sites label the button differently ("Copy as Markdown", "Copy markdown",
-#: a bare "Markdown", or a data-driven widget).
+#: a bare "Markdown", or a data-driven widget). "Copy page" is the common
+#: phrase on Mintlify/Nextra themes (they copy the page as markdown).
 _COPY_MD_SELECTORS = [
     "button:has-text('Copy as Markdown')",
     "button:has-text('Copy markdown')",
+    "button:has-text('Copy page')",
     "button:has-text('Markdown')",
     "[data-copy-markdown]",
     ".copy-markdown",

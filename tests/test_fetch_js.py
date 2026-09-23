@@ -39,6 +39,11 @@ def test_static_dispatch_does_not_start_js_session(monkeypatch):
 
 
 def test_fallback_selector_lists_are_populated():
-    assert len(fetch_mod._COPY_MD_SELECTORS) >= 5
+    assert len(fetch_mod._COPY_MD_SELECTORS) >= 6
     assert len(fetch_mod._DOM_FALLBACK_SELECTORS) >= 5
     assert fetch_mod._DEFAULT_JS_SETTLE_MS > 0
+
+
+def test_copy_page_selector_present():
+    # Mintlify/Nextra themes label the copy-as-markdown widget "Copy page".
+    assert "button:has-text('Copy page')" in fetch_mod._COPY_MD_SELECTORS
