@@ -227,7 +227,10 @@ class TestCrawlSite:
             "<div><article><h1>Docs</h1><p>page body</p></article></div>",
             "html.parser",
         )
-        monkeypatch.setattr("mcp_agent_docparser.crawl.fetch", lambda url, js_render=False: soup)
+        monkeypatch.setattr(
+            "mcp_agent_docparser.crawl.fetch",
+            lambda url, js_render=False, js_settle_ms=None: soup,
+        )
 
         result = crawl_site(sample_receipt, "https://ex.com/docs/", output_dir=tmp_path)
         assert result["status"] == "ok"
@@ -250,7 +253,10 @@ class TestCrawlSite:
             _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a", "https://ex.com/b"]))),
         )
         soup = BeautifulSoup("<article><p>ok</p></article>", "html.parser")
-        monkeypatch.setattr("mcp_agent_docparser.crawl.fetch", lambda url, js_render=False: soup if url.endswith("a") else None)
+        monkeypatch.setattr(
+            "mcp_agent_docparser.crawl.fetch",
+            lambda url, js_render=False, js_settle_ms=None: soup if url.endswith("a") else None,
+        )
 
         result = crawl_site(sample_receipt, "https://ex.com/docs/", output_dir=tmp_path)
         assert result["status"] == "ok"
@@ -265,7 +271,52 @@ class TestCrawlSite:
             "mcp_agent_docparser.crawl.requests.get",
             _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a"]))),
         )
-        monkeypatch.setattr("mcp_agent_docparser.crawl.fetch", lambda url, js_render=False: None)
+        monkeypatch.setattr(
+            "mcp_agent_docparser.crawl.fetch",
+            lambda url, js_render=False, js_settle_ms=None: None,
+        )
 
         result = crawl_site(sample_receipt, "https://ex.com/docs/", output_dir=tmp_path)
         assert result["status"] == "error"
+
+    def test_js_render_template_caps_workers_to_one(self, tmp_path, sample_receipt, monkeypatch):
+        """js_render templates serialize to 1 worker so the thread-bound browser is shared."""
+        _patch_robots(monkeypatch, None)
+        monkeypatch.setattr(
+            "mcp_agent_docparser.crawl.requests.get",
+            _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a"]))),
+        )
+        soup = BeautifulSoup("<article><p>js rendered</p></article>", "html.parser")
+        monkeypatch.setattr(
+            "mcp_agent_docparser.crawl.fetch",
+            lambda url, js_render=False, js_settle_ms=None: soup,
+        )
+
+        from concurrent.futures import Future
+
+        seen_workers: dict[str, int] = {}
+
+        class _SyncPool:
+            def __init__(self, max_workers):
+                seen_workers["max_workers"] = max_workers
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def submit(self, fn, *args, **kwargs):
+                fut = Future()
+                try:
+                    fut.set_result(fn(*args, **kwargs))
+                except BaseException as exc:  # noqa: BLE001
+                    fut.set_exception(exc)
+                return fut
+
+        monkeypatch.setattr("mcp_agent_docparser.crawl.ThreadPoolExecutor", _SyncPool)
+
+        js_template = dict(sample_receipt, js_render=True)
+        result = crawl_site(js_template, "https://ex.com/docs/", output_dir=tmp_path, workers=8)
+        assert result["status"] == "ok"
+        assert seen_workers["max_workers"] == 1

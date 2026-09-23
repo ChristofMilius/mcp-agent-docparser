@@ -62,6 +62,19 @@ class TestUpsertValidate:
         assert registry.get("sample")["name"] == "Renamed"
         assert len(registry.keys()) == 1
 
+    def test_js_settle_ms_must_be_non_negative_int(self, registry):
+        base = {"name": "X", "language": "py", "urls": ["http://x"], "selectors": ["body"]}
+        bad = dict(base, js_settle_ms=-1)
+        assert any("js_settle_ms" in e for e in registry.upsert("bad", bad, save=False))
+        bad = dict(base, js_settle_ms="800")
+        assert any("js_settle_ms" in e for e in registry.upsert("bad", bad, save=False))
+        ok = dict(base, js_settle_ms=1_500)
+        assert registry.upsert("ok", ok, save=True) == []
+        assert registry.get("ok")["js_settle_ms"] == 1_500
+        nul = dict(base, js_settle_ms=None)
+        assert registry.upsert("nul", nul, save=True) == []
+        assert registry.get("nul")["js_settle_ms"] is None
+
 
 class TestDeleteUpdate:
     def test_delete(self, registry):

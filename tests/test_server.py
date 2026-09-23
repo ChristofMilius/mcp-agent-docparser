@@ -66,7 +66,7 @@ class TestParsePipeline:
             "html.parser",
         )
 
-        def fake_fetch(url, js_render=False):
+        def fake_fetch(url, js_render=False, js_settle_ms=None):
             return soup
 
         monkeypatch.setattr("mcp_agent_docparser.parse.fetch", fake_fetch)

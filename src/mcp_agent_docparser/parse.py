@@ -13,7 +13,7 @@ from pathlib import Path
 
 from mcp_agent_docparser.emit import render_markdown, write_markdown
 from mcp_agent_docparser.extract import extract_content
-from mcp_agent_docparser.fetch import fetch
+from mcp_agent_docparser.fetch import close_js_session, fetch
 from mcp_agent_docparser.receipts import ReceiptRegistry
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,9 @@ def parse_receipt(
     if receipt is None:
         return {"status": "not_found", "key": key}
 
-    urls      = receipt.get("urls", [])
-    js_render = receipt.get("js_render", False)
+    urls         = receipt.get("urls", [])
+    js_render    = receipt.get("js_render", False)
+    js_settle_ms = receipt.get("js_settle_ms")
 
     if not urls:
         return {"status": "error", "key": key, "error": "receipt has no URLs defined."}
@@ -63,13 +64,16 @@ def parse_receipt(
 
     sections: list[tuple[str, str]] = []
     for url in urls:
-        soup = fetch(url, js_render=js_render)
+        soup = fetch(url, js_render=js_render, js_settle_ms=js_settle_ms)
         if soup is None:
             logger.warning("Skipping %s — fetch failed", url)
             continue
         content = extract_content(soup, receipt)
         sections.append((url, content))
         logger.info("extracted %d chars from %s", len(content), url)
+
+    if js_render:
+        close_js_session()
 
     if not sections:
         return {

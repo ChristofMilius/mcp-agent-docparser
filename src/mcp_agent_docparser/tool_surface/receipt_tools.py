@@ -63,12 +63,14 @@ def register(server, ctx) -> None:
         markdown_passthrough: bool = False,
         notes: str = "",
         code_language: str | None = None,
+        js_settle_ms: int | None = None,
     ) -> str:
         """
         Create a new receipt (or replace an existing one).
 
         Required: key, name, language, urls, selectors. Optional: strip_tags,
-        section, js_render, markdown_passthrough, notes, code_language.
+        section, js_render, markdown_passthrough, notes, code_language,
+        js_settle_ms.
         Validates before writing; returns validation errors if the receipt is
         malformed.
 
@@ -77,6 +79,9 @@ def register(server, ctx) -> None:
         in another language (e.g. a React SDK doc in English that emits
         TypeScript). When omitted, the fence language is auto-detected from the
         page and falls back to `language` only if it names a code language.
+
+        `js_settle_ms` tunes the Playwright hydration delay (ms) before the
+        "Copy as Markdown" button is probed for, for late-hydrating sites.
         """
         try:
             receipt = {
@@ -90,6 +95,7 @@ def register(server, ctx) -> None:
                 "markdown_passthrough": markdown_passthrough,
                 "notes": notes,
                 "code_language": code_language,
+                "js_settle_ms": js_settle_ms,
                 "last_fetched": None,
                 "last_output": None,
             }
@@ -98,7 +104,8 @@ def register(server, ctx) -> None:
                 return json.dumps({"status": "invalid", "key": key, "errors": errors}, indent=2)
             saved = registry.get(key)
             return json.dumps({"status": "ok", "key": key, "saved": {k: saved[k] for k in
-                              ("name", "language", "urls", "selectors", "js_render", "markdown_passthrough")}},
+                              ("name", "language", "urls", "selectors", "js_render",
+                               "markdown_passthrough", "js_settle_ms")}},
                               indent=2, ensure_ascii=False)
         except Exception as e:
             return tool_error("receipt_add", e)
@@ -115,8 +122,8 @@ def register(server, ctx) -> None:
         """
         try:
             allowed = {"name", "language", "urls", "selectors", "strip_tags",
-                       "section", "js_render", "markdown_passthrough", "notes",
-                       "code_language"}
+                   "section", "js_render", "markdown_passthrough", "notes",
+                   "code_language", "js_settle_ms"}
             fields = {k: v for k, v in updates.items() if k in allowed}
             if not fields:
                 return json.dumps({"status": "no_fields", "allowed": sorted(allowed)}, indent=2)

@@ -317,9 +317,15 @@ class _Throttle:
             self._next_at = max(now, self._next_at) + self._delay
 
 
-def _extract_page(url: str, template: dict, throttle: _Throttle) -> tuple[str, str | None]:
+def _extract_page(
+    url: str, template: dict, throttle: _Throttle
+) -> tuple[str, str | None]:
     throttle.wait()
-    soup = fetch(url, js_render=template.get("js_render", False))
+    soup = fetch(
+        url,
+        js_render=template.get("js_render", False),
+        js_settle_ms=template.get("js_settle_ms"),
+    )
     if soup is None:
         return url, None
     return url, extract_content(soup, template)
@@ -364,6 +370,12 @@ def crawl_site(
         return result
 
     throttle = _Throttle(discovery["crawl_delay"])
+    if template.get("js_render", False) and workers > 1:
+        logger.info(
+            "crawl: template uses js_render — serializing to 1 worker so the "
+            "thread-bound Playwright browser is shared"
+        )
+        workers = 1
     sections: list[tuple[str, str]] = []
     failed = 0
     with ThreadPoolExecutor(max_workers=workers) as pool:

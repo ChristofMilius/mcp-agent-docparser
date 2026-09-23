@@ -33,6 +33,9 @@ _AUTO_KEYS: dict[str, object] = {
     #: code language. Lets a receipt keep a human doc language (e.g. "english")
     #: separate from the SDK code language ("typescript").
     "code_language":        None,
+    #: Playwright hydration delay before probing for the "Copy as Markdown"
+    #: button (ms). Lets a receipt tune late-hydrating docs sites.
+    "js_settle_ms":         None,
     "last_fetched":         None,
     "last_output":          None,
 }
@@ -63,6 +66,9 @@ def _validate_receipt(key: str, receipt: dict) -> list[str]:
     if "code_language" in receipt and receipt["code_language"] is not None \
             and not isinstance(receipt["code_language"], str):
         errors.append("'code_language' must be a string or null")
+    if "js_settle_ms" in receipt and receipt["js_settle_ms"] is not None \
+            and (not isinstance(receipt["js_settle_ms"], int) or receipt["js_settle_ms"] < 0):
+        errors.append("'js_settle_ms' must be a non-negative integer or null")
     return errors
 
 

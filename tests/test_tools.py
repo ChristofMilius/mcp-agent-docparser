@@ -101,6 +101,22 @@ class TestReceiptTools:
         assert got["language"] == "english"
         assert got["code_language"] == "typescript"
 
+    def test_add_accepts_js_settle_ms(self, tools, ctx):
+        out = _parse(tools["receipt_add"](
+            key="slow", name="Slow", language="english",
+            urls=["https://x.dev"], selectors=["#content"],
+            js_render=True, js_settle_ms=3_000,
+        ))
+        assert out["status"] == "ok"
+        got = ctx.registry.get("slow")
+        assert got["js_render"] is True
+        assert got["js_settle_ms"] == 3_000
+
+    def test_edit_allows_js_settle_ms(self, tools, ctx):
+        out = _parse(tools["receipt_edit"](key="sample", updates={"js_settle_ms": 1_200}))
+        assert out["status"] == "ok"
+        assert ctx.registry.get("sample")["js_settle_ms"] == 1_200
+
     def test_edit_patches_code_language(self, tools, ctx):
         out = _parse(tools["receipt_edit"](key="sample", updates={"code_language": "json"}))
         assert out["status"] == "ok"

@@ -13,7 +13,7 @@ from mcp_agent_docparser.crawl import crawl_site
 from mcp_agent_docparser.emit import render_markdown, write_markdown
 from mcp_agent_docparser.errors import tool_error
 from mcp_agent_docparser.extract import extract_content
-from mcp_agent_docparser.fetch import fetch
+from mcp_agent_docparser.fetch import close_js_session, fetch
 from mcp_agent_docparser.parse import parse_receipt
 
 _MAX_CRAWL_PAGES = 5000
@@ -57,7 +57,13 @@ def register(server, ctx) -> None:
             template["name"] = f"Custom — {url[:60]}"
             template["urls"] = [url]
 
-            soup = fetch(url, js_render=template.get("js_render", False))
+            soup = fetch(
+                url,
+                js_render=template.get("js_render", False),
+                js_settle_ms=template.get("js_settle_ms"),
+            )
+            if template.get("js_render", False):
+                close_js_session()
             if soup is None:
                 return json.dumps({"status": "fetch_failed", "url": url}, indent=2)
 
