@@ -43,6 +43,12 @@ Workflow for a new site:
      Use dry_run=true first to see what will be fetched.
   Unfamiliar single pages that match an existing receipt's templates can be
   parsed directly with doc_parse_url without saving a receipt.
+
+Whole-site ingestion: doc_crawl discovers every page of a site via its
+sitemaps/robots.txt (same-host link walk as fallback), fetches them
+concurrently, and emits one combined .md. Pass dry_run=true first to list
+the URLs that would be crawled before committing. Crawls never modify the
+registry.
 """.strip()
 
 

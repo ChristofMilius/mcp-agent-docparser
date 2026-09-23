@@ -53,7 +53,7 @@ class TestServerMeta:
             "get_current_datetime",
             "receipt_list", "receipt_show", "receipt_add",
             "receipt_edit", "receipt_delete", "receipt_reload",
-            "doc_parse", "doc_parse_url",
+            "doc_parse", "doc_parse_url", "doc_crawl",
             "doc_probe", "doc_probe_js", "doc_output",
         }
         assert expected <= set(tools)

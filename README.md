@@ -17,7 +17,7 @@ harness (Claude, opencode, etc.) over stdio.
 | Domain | Tools |
 |---|---|
 | Receipts | `receipt_list`, `receipt_show`, `receipt_add`, `receipt_edit`, `receipt_delete`, `receipt_reload` |
-| Parse | `doc_parse`, `doc_parse_url` |
+| Parse | `doc_parse`, `doc_parse_url`, `doc_crawl` |
 | Discovery | `doc_probe`, `doc_probe_js`, `doc_output` |
 | Utility | `get_current_datetime` |
 
@@ -75,6 +75,26 @@ keep them; they are regular receipts.
 
 For a single unfamiliar page that matches an existing receipt's template,
 `doc_parse_url(template_key, url)` parses it without persisting a receipt.
+
+### Whole-site ingestion with `doc_crawl`
+
+```
+1. doc_probe / doc_probe_js → confirm the site renders + pick a template
+   receipt whose selectors fit.
+2. doc_crawl(key, url) with dry_run=true → discovery only: sitemaps/robots
+   are read, candidate URLs are listed, nothing is fetched. Scope with
+   max_pages and path_prefix if the list is too big.
+3. doc_crawl(key, url) → fetches the discovered pages concurrently, emits one
+   combined {name}_{timestamp}.md, and returns the markup inline.
+```
+
+Crawl discovery order: robots.txt `Sitemap:` directives → sitemap index →
+leaf sitemaps (a `.xml` seed is parsed directly) → same-host link walk as a
+fallback for sites without a sitemap. Politeness is robots-strict: every URL
+passes through the site's `robots.txt` before fetching, a declared
+`Crawl-delay` throttles the workers, and results are deduped, same-origin,
+and capped at `max_pages` (default 200). Crawls never modify the registry —
+they are one-shot like `doc_parse_url`.
 
 ## Requirements
 

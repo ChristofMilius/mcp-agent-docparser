@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import json
 
+from mcp_agent_docparser.crawl import crawl_site
 from mcp_agent_docparser.emit import render_markdown, write_markdown
 from mcp_agent_docparser.errors import tool_error
 from mcp_agent_docparser.extract import extract_content
 from mcp_agent_docparser.fetch import fetch
 from mcp_agent_docparser.parse import parse_receipt
+
+_MAX_CRAWL_PAGES = 5000
 
 
 def register(server, ctx) -> None:
@@ -72,6 +75,51 @@ def register(server, ctx) -> None:
             }, indent=2, ensure_ascii=False)
         except Exception as e:
             return tool_error("doc_parse_url", e)
+
+    @server.tool()
+    def doc_crawl(
+        key: str,
+        url: str,
+        max_pages: int = 200,
+        path_prefix: str = "",
+        dry_run: bool = False,
+    ) -> str:
+        """
+        Crawl a documentation site and emit one combined .md file.
+
+        Discovers the site's pages via sitemaps/robots.txt (falling back to a
+        same-host link walk), honors robots.txt Disallow + Crawl-delay, fetches
+        pages concurrently through the receipt's selectors, and emits a single
+        timestamped .md in the output directory. One-shot — the registry is
+        not modified and no receipt is persisted.
+
+        Pass dry_run=true first: discovery runs, no pages are fetched, and the
+        full candidate URL list is returned so you can scope the crawl
+        (max_pages / path_prefix) before committing.
+        """
+        try:
+            receipt = registry.get(key)
+            if receipt is None:
+                return json.dumps({"status": "not_found", "key": key}, indent=2)
+
+            max_pages = max(1, min(max_pages, _MAX_CRAWL_PAGES))
+            prefix = path_prefix.strip() or None
+
+            return json.dumps(
+                crawl_site(
+                    dict(receipt),
+                    url,
+                    output_dir=output_dir,
+                    key=key,
+                    max_pages=max_pages,
+                    path_prefix=prefix,
+                    dry_run=dry_run,
+                ),
+                indent=2,
+                ensure_ascii=False,
+            )
+        except Exception as e:
+            return tool_error("doc_crawl", e)
 
 
 __all__ = ["register"]
