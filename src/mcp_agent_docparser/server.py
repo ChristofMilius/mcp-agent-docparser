@@ -74,7 +74,10 @@ def create_server(ctx: AppContext | None = None) -> MCPServer:
 
     logger.info(
         "[server] %s v%s ready (receipts=%s, output=%s)",
-        SERVER_NAME, __version__, ctx.cfg.receipts_path, ctx.cfg.output_dir,
+        SERVER_NAME,
+        __version__,
+        ctx.cfg.receipts_path,
+        ctx.cfg.output_dir,
     )
     return server
 

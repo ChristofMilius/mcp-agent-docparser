@@ -1,4 +1,5 @@
 """tests/test_server.py — server assembly and parse pipeline."""
+
 from __future__ import annotations
 
 import types

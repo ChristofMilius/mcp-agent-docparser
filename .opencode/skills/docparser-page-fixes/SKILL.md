@@ -59,16 +59,18 @@ copy-markdown a JS site produces:
 ```python
 # scratch — same flow as fetch.py fetch_js()
 from playwright.sync_api import sync_playwright
+
 with sync_playwright() as pw:
-    b  = pw.chromium.launch(headless=True)
+    b = pw.chromium.launch(headless=True)
     ctx = b.new_context(permissions=["clipboard-read", "clipboard-write"])
-    pg  = ctx.new_page()
+    pg = ctx.new_page()
     pg.goto(url, wait_until="networkidle", timeout=45_000)
     pg.wait_for_selector("button:has-text('Markdown')", timeout=12_000)
     pg.click("button:has-text('Markdown')")
     pg.wait_for_timeout(800)
     print(pg.evaluate("navigator.clipboard.readText()"))
-    ctx.close(); b.close()
+    ctx.close()
+    b.close()
 ```
 
 Feed that through `extract_content()` with a passthrough receipt and inspect.

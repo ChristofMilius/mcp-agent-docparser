@@ -25,17 +25,21 @@ def register(server, ctx) -> None:
             items = []
             for key, rec in sorted(data.items()):
                 urls = rec.get("urls", [])
-                items.append({
-                    "key": key,
-                    "name": rec.get("name", key),
-                    "language": rec.get("language", "text"),
-                    "url_count": len(urls),
-                    "first_url": urls[0] if urls else None,
-                    "js_render": rec.get("js_render", False),
-                    "last_fetched": rec.get("last_fetched"),
-                    "last_output": rec.get("last_output"),
-                })
-            return json.dumps({"count": len(items), "receipts": items}, indent=2, ensure_ascii=False)
+                items.append(
+                    {
+                        "key": key,
+                        "name": rec.get("name", key),
+                        "language": rec.get("language", "text"),
+                        "url_count": len(urls),
+                        "first_url": urls[0] if urls else None,
+                        "js_render": rec.get("js_render", False),
+                        "last_fetched": rec.get("last_fetched"),
+                        "last_output": rec.get("last_output"),
+                    }
+                )
+            return json.dumps(
+                {"count": len(items), "receipts": items}, indent=2, ensure_ascii=False
+            )
         except Exception as e:
             return tool_error("receipt_list", e)
 
@@ -103,10 +107,26 @@ def register(server, ctx) -> None:
             if errors:
                 return json.dumps({"status": "invalid", "key": key, "errors": errors}, indent=2)
             saved = registry.get(key)
-            return json.dumps({"status": "ok", "key": key, "saved": {k: saved[k] for k in
-                              ("name", "language", "urls", "selectors", "js_render",
-                               "markdown_passthrough", "js_settle_ms")}},
-                              indent=2, ensure_ascii=False)
+            return json.dumps(
+                {
+                    "status": "ok",
+                    "key": key,
+                    "saved": {
+                        k: saved[k]
+                        for k in (
+                            "name",
+                            "language",
+                            "urls",
+                            "selectors",
+                            "js_render",
+                            "markdown_passthrough",
+                            "js_settle_ms",
+                        )
+                    },
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
         except Exception as e:
             return tool_error("receipt_add", e)
 
@@ -121,9 +141,19 @@ def register(server, ctx) -> None:
         does not exist.
         """
         try:
-            allowed = {"name", "language", "urls", "selectors", "strip_tags",
-                   "section", "js_render", "markdown_passthrough", "notes",
-                   "code_language", "js_settle_ms"}
+            allowed = {
+                "name",
+                "language",
+                "urls",
+                "selectors",
+                "strip_tags",
+                "section",
+                "js_render",
+                "markdown_passthrough",
+                "notes",
+                "code_language",
+                "js_settle_ms",
+            }
             fields = {k: v for k, v in updates.items() if k in allowed}
             if not fields:
                 return json.dumps({"status": "no_fields", "allowed": sorted(allowed)}, indent=2)
@@ -139,7 +169,9 @@ def register(server, ctx) -> None:
         """Delete a receipt by key. Returns false if the key does not exist."""
         try:
             existed = registry.delete(key)
-            return json.dumps({"status": "deleted" if existed else "not_found", "key": key}, indent=2)
+            return json.dumps(
+                {"status": "deleted" if existed else "not_found", "key": key}, indent=2
+            )
         except Exception as e:
             return tool_error("receipt_delete", e)
 

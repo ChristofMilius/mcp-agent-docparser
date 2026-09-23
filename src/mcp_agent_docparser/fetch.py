@@ -43,6 +43,7 @@ def _reject_source_clipboard(content: str) -> bool:
         return True  # empty payload is always unusable
     return any(sniff.search(content) for sniff in _SOURCE_SNIFFERS)
 
+
 #: Button selectors for the "Copy as Markdown" strategy, tried in order.
 #: Sites label the button differently ("Copy as Markdown", "Copy markdown",
 #: a bare "Markdown", or a data-driven widget). "Copy page" is the common
@@ -233,7 +234,9 @@ def fetch_js(url: str, *, js_settle_ms: int | None = None) -> BeautifulSoup | No
     try:
         from playwright.sync_api import TimeoutError as PWTimeout
     except ImportError:
-        logger.error("playwright not installed — run: uv sync && uv run playwright install chromium")
+        logger.error(
+            "playwright not installed — run: uv sync && uv run playwright install chromium"
+        )
         return None
 
     settle = _DEFAULT_JS_SETTLE_MS if js_settle_ms is None else max(0, js_settle_ms)
@@ -315,7 +318,9 @@ def fetch_js(url: str, *, js_settle_ms: int | None = None) -> BeautifulSoup | No
             page.close()
 
 
-def fetch(url: str, js_render: bool = False, js_settle_ms: int | None = None) -> BeautifulSoup | None:
+def fetch(
+    url: str, js_render: bool = False, js_settle_ms: int | None = None
+) -> BeautifulSoup | None:
     """Dispatch to the correct fetcher based on the js_render flag."""
     cached = cache_get(url, js_render)
     if cached is not None:

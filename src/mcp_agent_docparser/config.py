@@ -37,18 +37,10 @@ def _resolve_path(raw: str) -> Path:
 
 class Config:
     def __init__(self) -> None:
-        self.receipts_path: Path = _resolve_path(
-            os.getenv("DOCPARSER_RECEIPTS", "receipts.json")
-        )
-        self.output_dir: Path = _resolve_path(
-            os.getenv("DOCPARSER_OUTPUT_DIR", "doc_output")
-        )
-        self.logs_dir: Path = _resolve_path(
-            os.getenv("DOCPARSER_LOGS_DIR", "logs")
-        )
-        self.cache_dir: Path = _resolve_path(
-            os.getenv("DOCPARSER_CACHE_DIR", "cache")
-        )
+        self.receipts_path: Path = _resolve_path(os.getenv("DOCPARSER_RECEIPTS", "receipts.json"))
+        self.output_dir: Path = _resolve_path(os.getenv("DOCPARSER_OUTPUT_DIR", "doc_output"))
+        self.logs_dir: Path = _resolve_path(os.getenv("DOCPARSER_LOGS_DIR", "logs"))
+        self.cache_dir: Path = _resolve_path(os.getenv("DOCPARSER_CACHE_DIR", "cache"))
         self.cache_ttl_seconds: float = _env_float("DOCPARSER_CACHE_TTL_SECONDS", 0.0)
 
     def __repr__(self) -> str:

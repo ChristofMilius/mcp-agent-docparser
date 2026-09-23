@@ -93,7 +93,8 @@ def _fetch_robots(seed_url: str) -> tuple[str | None, str]:
     if response.status_code >= 400:
         logger.warning(
             "crawl: robots.txt returned HTTP %d for %s — assuming allow-all",
-            response.status_code, robots_url,
+            response.status_code,
+            robots_url,
         )
         return None, robots_url
     return response.text, robots_url
@@ -317,9 +318,7 @@ class _Throttle:
             self._next_at = max(now, self._next_at) + self._delay
 
 
-def _extract_page(
-    url: str, template: dict, throttle: _Throttle
-) -> tuple[str, str | None]:
+def _extract_page(url: str, template: dict, throttle: _Throttle) -> tuple[str, str | None]:
     throttle.wait()
     soup = fetch(
         url,

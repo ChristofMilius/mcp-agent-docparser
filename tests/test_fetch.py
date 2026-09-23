@@ -1,4 +1,5 @@
 """tests/test_fetch.py — fetch-layer decoding and error handling (no network)."""
+
 from __future__ import annotations
 
 import re
@@ -22,8 +23,7 @@ def _make_response(content: bytes, declared: str | None) -> requests.Response:
 @pytest.fixture
 def utf8_page_bytes() -> bytes:
     return (
-        "<html><body><h1>Norwegian Bokmål</h1>"
-        "<p>YouTube’s player — café</p></body></html>"
+        "<html><body><h1>Norwegian Bokmål</h1><p>YouTube’s player — café</p></body></html>"
     ).encode()
 
 

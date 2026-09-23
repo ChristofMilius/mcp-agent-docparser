@@ -1,4 +1,5 @@
 """tests/test_crawl.py — site crawl: discovery, robots, dedup, extraction, emit."""
+
 from __future__ import annotations
 
 import requests
@@ -22,14 +23,12 @@ def _sitemap_xml(urlset: bool, locs: list[str]) -> bytes:
     child = "url" if urlset else "sitemap"
     items = "".join(f"<{child}><loc>{loc}</loc></{child}>" for loc in locs)
     return (
-        f'<?xml version="1.0" encoding="UTF-8"?>'
-        f'<{tag} xmlns="{SITEMAP_NS}">{items}</{tag}>'
+        f'<?xml version="1.0" encoding="UTF-8"?><{tag} xmlns="{SITEMAP_NS}">{items}</{tag}>'
     ).encode()
 
 
 def _fake_get(*bodies: tuple[str, bytes]):
     """Return a requests.get patch mapping url → xml body (200) or None (404)."""
-
 
     table = dict(bodies)
 
@@ -79,7 +78,6 @@ class TestUrlHelpers:
 class TestParseSitemap:
     def test_urlset_returns_pages(self, monkeypatch):
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
             _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a"]))),
@@ -90,7 +88,6 @@ class TestParseSitemap:
 
     def test_sitemapindex_returns_nested(self, monkeypatch):
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
             _fake_get(("https://ex.com/index.xml", _sitemap_xml(False, ["https://ex.com/a.xml"]))),
@@ -100,7 +97,6 @@ class TestParseSitemap:
         assert nested == ["https://ex.com/a.xml"]
 
     def test_missing_sitemap_yields_nothing(self, monkeypatch):
-
 
         monkeypatch.setattr("mcp_agent_docparser.crawl.requests.get", _fake_get())
         assert _parse_sitemap("https://ex.com/nope.xml") == ([], [])
@@ -116,20 +112,22 @@ class TestDiscovery:
         )
         _patch_robots(monkeypatch, robots_body)
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
             _fake_get(
                 ("https://ex.com/index.xml", _sitemap_xml(False, ["https://ex.com/a.xml"])),
                 (
                     "https://ex.com/a.xml",
-                    _sitemap_xml(True, [
-                        "https://ex.com/public/a",
-                        "https://ex.com/private/secret",
-                        "https://elsewhere.dev/x",
-                        "https://ex.com/public/a",
-                        "https://ex.com/private/x",
-                    ]),
+                    _sitemap_xml(
+                        True,
+                        [
+                            "https://ex.com/public/a",
+                            "https://ex.com/private/secret",
+                            "https://elsewhere.dev/x",
+                            "https://ex.com/public/a",
+                            "https://ex.com/private/x",
+                        ],
+                    ),
                 ),
             ),
         )
@@ -143,10 +141,14 @@ class TestDiscovery:
     def test_xml_seed_parsed_directly(self, monkeypatch):
         _patch_robots(monkeypatch, None)
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
-            _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/b", "https://ex.com/a"]))),
+            _fake_get(
+                (
+                    "https://ex.com/sitemap.xml",
+                    _sitemap_xml(True, ["https://ex.com/b", "https://ex.com/a"]),
+                )
+            ),
         )
         result = discover_urls("https://ex.com/sitemap.xml")
         assert result["source"] == "seed"
@@ -154,7 +156,6 @@ class TestDiscovery:
 
     def test_link_walk_fallback_when_sitemap_empty(self, monkeypatch):
         _patch_robots(monkeypatch, None)
-
 
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
@@ -182,7 +183,6 @@ class TestDiscovery:
     def test_max_pages_caps_sitemap_result(self, monkeypatch):
         _patch_robots(monkeypatch, None)
 
-
         many = [f"https://ex.com/p{i:03d}" for i in range(50)]
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
@@ -198,7 +198,6 @@ class TestCrawlSite:
     def test_dry_run_writes_nothing(self, tmp_path, sample_receipt, monkeypatch):
         _patch_robots(monkeypatch, None)
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
             _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a"]))),
@@ -210,7 +209,9 @@ class TestCrawlSite:
         monkeypatch.setattr("mcp_agent_docparser.crawl.fetch", boom)
         monkeypatch.setattr("mcp_agent_docparser.crawl.fetch_static", boom)
 
-        result = crawl_site(sample_receipt, "https://ex.com/docs/", output_dir=tmp_path, dry_run=True)
+        result = crawl_site(
+            sample_receipt, "https://ex.com/docs/", output_dir=tmp_path, dry_run=True
+        )
         assert result["status"] == "dry_run"
         assert result["urls"] == ["https://ex.com/a"]
         assert list(tmp_path.glob("*.md")) == []
@@ -218,10 +219,14 @@ class TestCrawlSite:
     def test_full_crawl_emits_combined_file(self, tmp_path, sample_receipt, monkeypatch):
         _patch_robots(monkeypatch, None)
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
-            _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/z", "https://ex.com/a"]))),
+            _fake_get(
+                (
+                    "https://ex.com/sitemap.xml",
+                    _sitemap_xml(True, ["https://ex.com/z", "https://ex.com/a"]),
+                )
+            ),
         )
         soup = BeautifulSoup(
             "<div><article><h1>Docs</h1><p>page body</p></article></div>",
@@ -247,10 +252,14 @@ class TestCrawlSite:
     def test_fetch_failures_are_skipped_and_reported(self, tmp_path, sample_receipt, monkeypatch):
         _patch_robots(monkeypatch, None)
 
-
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",
-            _fake_get(("https://ex.com/sitemap.xml", _sitemap_xml(True, ["https://ex.com/a", "https://ex.com/b"]))),
+            _fake_get(
+                (
+                    "https://ex.com/sitemap.xml",
+                    _sitemap_xml(True, ["https://ex.com/a", "https://ex.com/b"]),
+                )
+            ),
         )
         soup = BeautifulSoup("<article><p>ok</p></article>", "html.parser")
         monkeypatch.setattr(
@@ -265,7 +274,6 @@ class TestCrawlSite:
 
     def test_all_fetches_fail_reports_error(self, tmp_path, sample_receipt, monkeypatch):
         _patch_robots(monkeypatch, None)
-
 
         monkeypatch.setattr(
             "mcp_agent_docparser.crawl.requests.get",

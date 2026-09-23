@@ -19,11 +19,47 @@ _CODE_LANG_CLASS_RE = re.compile(r"language-([a-zA-Z0-9#+_-]+)")
 #: like "english"). Used as a fallback when a receipt carries no explicit
 #: code_language and the page offers no data-language / language-* hint.
 _TRAILING_CODE_LANGS = {
-    "python", "py", "python3", "js", "javascript", "node", "typescript", "ts",
-    "json", "jsonc", "bash", "sh", "shell", "zsh", "powershell", "ps1",
-    "go", "golang", "rust", "c", "cpp", "c++", "csharp", "java", "kotlin",
-    "ruby", "php", "swift", "sql", "html", "css", "scss", "yaml", "yml",
-    "toml", "makefile", "dockerfile", "markdown", "md", "text", "plaintext",
+    "python",
+    "py",
+    "python3",
+    "js",
+    "javascript",
+    "node",
+    "typescript",
+    "ts",
+    "json",
+    "jsonc",
+    "bash",
+    "sh",
+    "shell",
+    "zsh",
+    "powershell",
+    "ps1",
+    "go",
+    "golang",
+    "rust",
+    "c",
+    "cpp",
+    "c++",
+    "csharp",
+    "java",
+    "kotlin",
+    "ruby",
+    "php",
+    "swift",
+    "sql",
+    "html",
+    "css",
+    "scss",
+    "yaml",
+    "yml",
+    "toml",
+    "makefile",
+    "dockerfile",
+    "markdown",
+    "md",
+    "text",
+    "plaintext",
     "none",
 }
 
@@ -114,6 +150,7 @@ def css_hint(tag: Tag) -> str:
 
 def _strip_heading_hash_tokens(text: str) -> str:
     """Drop trailing '[#anchor-slug]' tokens only when the slug matches the line text."""
+
     def _repl(match: re.Match) -> str:
         body, slug = match.group(1), match.group(2)
         if _to_kebab(body) == slug:
@@ -219,11 +256,7 @@ def _collapse_pre_blocks(content_block: Tag, soup: BeautifulSoup) -> None:
     """
     for pre in content_block.find_all("pre"):
         code = pre.find("code") or pre
-        line_els = (
-            code.select(".ec-line")
-            or code.select(".line")
-            or code.select(".token-line")
-        )
+        line_els = code.select(".ec-line") or code.select(".line") or code.select(".token-line")
         if not line_els:
             continue
         text = "\n".join(el.get_text() for el in line_els) + "\n"

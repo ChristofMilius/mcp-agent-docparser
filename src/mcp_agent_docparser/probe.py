@@ -18,10 +18,19 @@ from mcp_agent_docparser.fetch import fetch_static
 logger = logging.getLogger(__name__)
 
 _PROBE_SELECTORS = [
-    "#content", ".prose", "article", "main", "[role='main']",
-    ".content", ".docs-content", ".markdown-body",
-    ".md-content", ".page-content", "[class*='mdx']",
-    "[class*='article']", "[class*='doc-content']",
+    "#content",
+    ".prose",
+    "article",
+    "main",
+    "[role='main']",
+    ".content",
+    ".docs-content",
+    ".markdown-body",
+    ".md-content",
+    ".page-content",
+    "[class*='mdx']",
+    "[class*='article']",
+    "[class*='doc-content']",
 ]
 
 #: Elements that are almost always page furniture, not documentation. Reporter
@@ -49,7 +58,7 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
     Walk _PROBE_SELECTORS against a parsed DOM and report hits, H2 structure,
     and sample links. Used by probe_url and probe_url_js.
     """
-    hits: list[str]   = []
+    hits: list[str] = []
     misses: list[str] = []
     hit_details: list[dict] = []
     first_match: Tag | None = None
@@ -71,8 +80,9 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
     noise: list[dict] = []
     if first_match is not None:
         h2s = [h.get_text().strip()[:70] for h in first_match.find_all("h2")][:15]
-        links = [a["href"] for a in first_match.find_all("a", href=True)
-                 if a["href"].startswith("http")][:10]
+        links = [
+            a["href"] for a in first_match.find_all("a", href=True) if a["href"].startswith("http")
+        ][:10]
         for sel in _NOISE_SELECTORS:
             count = len(first_match.select(sel))
             if count:
@@ -85,14 +95,14 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
             logger.info("scored fallback candidate: %s", scored_selector)
 
     return {
-        "hits":             hits,
-        "misses":           misses,
-        "hit_details":      hit_details,
-        "h2s":              h2s,
-        "links":            links,
+        "hits": hits,
+        "misses": misses,
+        "hit_details": hit_details,
+        "h2s": h2s,
+        "links": links,
         "noise_candidates": noise,
-        "best_selector":    hits[0] if hits else None,
-        "scored_selector":  scored_selector,
+        "best_selector": hits[0] if hits else None,
+        "scored_selector": scored_selector,
     }
 
 
@@ -108,8 +118,8 @@ def probe_url(url: str) -> dict | None:
         return None
 
     findings = _analyse_probe_soup(soup)
-    findings["url"]         = url
-    findings["js"]          = False
+    findings["url"] = url
+    findings["js"] = False
     findings["copy_button"] = None
     return findings
 
@@ -127,7 +137,9 @@ def probe_url_js(url: str) -> dict | None:
         from playwright.sync_api import TimeoutError as PWTimeout
         from playwright.sync_api import sync_playwright
     except ImportError:
-        logger.error("playwright not installed — run: uv sync && uv run playwright install chromium")
+        logger.error(
+            "playwright not installed — run: uv sync && uv run playwright install chromium"
+        )
         return None
 
     logger.info("Probing (JS): %s", url)
@@ -138,7 +150,7 @@ def probe_url_js(url: str) -> dict | None:
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=True)
             context = browser.new_context()
-            page    = context.new_page()
+            page = context.new_page()
 
             logger.info("playwright: navigating …")
             try:
@@ -147,11 +159,13 @@ def probe_url_js(url: str) -> dict | None:
             except PWTimeout:
                 logger.warning("playwright: networkidle timed out — continuing with current DOM")
 
-            page.wait_for_timeout(1_000)   # let late hydration settle
+            page.wait_for_timeout(1_000)  # let late hydration settle
 
             copy_button = page.locator("button:has-text('Markdown')").count() > 0
             if copy_button:
-                logger.info("'Copy as Markdown' button detected — saved receipt will use markdown_passthrough.")
+                logger.info(
+                    "'Copy as Markdown' button detected — saved receipt will use markdown_passthrough."
+                )
 
             html = page.content()
             logger.info("playwright: captured %d chars of rendered HTML", len(html))
@@ -165,8 +179,8 @@ def probe_url_js(url: str) -> dict | None:
 
     soup = BeautifulSoup(html, "html.parser")
     findings = _analyse_probe_soup(soup)
-    findings["url"]         = url
-    findings["js"]          = True
+    findings["url"] = url
+    findings["js"] = True
     findings["copy_button"] = copy_button
     return findings
 

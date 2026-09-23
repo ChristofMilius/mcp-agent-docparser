@@ -63,7 +63,7 @@ def write_markdown(receipt: dict, sections: list[tuple[str, str]], output_dir: P
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filepath  = output_dir / f"{_safe_name(receipt['name'])}_{timestamp}.md"
+    filepath = output_dir / f"{_safe_name(receipt['name'])}_{timestamp}.md"
 
     filepath.write_text(render_markdown(receipt, sections), encoding="utf-8")
     return filepath

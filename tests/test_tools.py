@@ -1,4 +1,5 @@
 """tests/test_tools.py — tool surface through a fake MCPServer."""
+
 from __future__ import annotations
 
 import json
@@ -51,10 +52,18 @@ class TestServerMeta:
     def test_all_tools_registered(self, tools):
         expected = {
             "get_current_datetime",
-            "receipt_list", "receipt_show", "receipt_add",
-            "receipt_edit", "receipt_delete", "receipt_reload",
-            "doc_parse", "doc_parse_url", "doc_crawl",
-            "doc_probe", "doc_probe_js", "doc_output",
+            "receipt_list",
+            "receipt_show",
+            "receipt_add",
+            "receipt_edit",
+            "receipt_delete",
+            "receipt_reload",
+            "doc_parse",
+            "doc_parse_url",
+            "doc_crawl",
+            "doc_probe",
+            "doc_probe_js",
+            "doc_output",
             "doc_cache_clear",
         }
         assert expected <= set(tools)
@@ -87,38 +96,58 @@ class TestReceiptTools:
         assert out["status"] == "not_found"
 
     def test_add_creates_and_validates(self, tools, ctx, sample_receipt):
-        out = _parse(tools["receipt_add"](
-            key="new",
-            name="New SDK", language="typescript",
-            urls=["https://x.dev"], selectors=["#content", "body"],
-            notes="added by test",
-        ))
+        out = _parse(
+            tools["receipt_add"](
+                key="new",
+                name="New SDK",
+                language="typescript",
+                urls=["https://x.dev"],
+                selectors=["#content", "body"],
+                notes="added by test",
+            )
+        )
         assert out["status"] == "ok"
         assert ctx.registry.get("new")["language"] == "typescript"
 
-        bad = _parse(tools["receipt_add"](
-            key="bad", name="Bad", language="text",
-            urls=["https://x.dev"], selectors=[],
-        ))
+        bad = _parse(
+            tools["receipt_add"](
+                key="bad",
+                name="Bad",
+                language="text",
+                urls=["https://x.dev"],
+                selectors=[],
+            )
+        )
         assert bad["status"] == "invalid"
 
     def test_add_accepts_code_language(self, tools, ctx):
-        out = _parse(tools["receipt_add"](
-            key="code", name="Code", language="english",
-            urls=["https://x.dev"], selectors=["#content"],
-            code_language="typescript",
-        ))
+        out = _parse(
+            tools["receipt_add"](
+                key="code",
+                name="Code",
+                language="english",
+                urls=["https://x.dev"],
+                selectors=["#content"],
+                code_language="typescript",
+            )
+        )
         assert out["status"] == "ok"
         got = ctx.registry.get("code")
         assert got["language"] == "english"
         assert got["code_language"] == "typescript"
 
     def test_add_accepts_js_settle_ms(self, tools, ctx):
-        out = _parse(tools["receipt_add"](
-            key="slow", name="Slow", language="english",
-            urls=["https://x.dev"], selectors=["#content"],
-            js_render=True, js_settle_ms=3_000,
-        ))
+        out = _parse(
+            tools["receipt_add"](
+                key="slow",
+                name="Slow",
+                language="english",
+                urls=["https://x.dev"],
+                selectors=["#content"],
+                js_render=True,
+                js_settle_ms=3_000,
+            )
+        )
         assert out["status"] == "ok"
         got = ctx.registry.get("slow")
         assert got["js_render"] is True
@@ -135,7 +164,9 @@ class TestReceiptTools:
         assert ctx.registry.get("sample")["code_language"] == "json"
 
     def test_edit_patches_fields(self, tools, ctx):
-        out = _parse(tools["receipt_edit"](key="sample", updates={"notes": "edited", "js_render": True}))
+        out = _parse(
+            tools["receipt_edit"](key="sample", updates={"notes": "edited", "js_render": True})
+        )
         assert out["status"] == "ok"
         got = ctx.registry.get("sample")
         assert got["notes"] == "edited"

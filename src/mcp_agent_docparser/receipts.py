@@ -23,21 +23,21 @@ _REQUIRED_KEYS: set[str] = {"name", "language", "urls", "selectors"}
 
 #: Keys that are managed automatically and should always be present after normalisation.
 _AUTO_KEYS: dict[str, object] = {
-    "strip_tags":           [],
-    "section":              None,
-    "js_render":            False,
+    "strip_tags": [],
+    "section": None,
+    "js_render": False,
     "markdown_passthrough": False,
-    "notes":                "",
+    "notes": "",
     #: Optional override for the ``` code-fence language. When absent, extract
     #: auto-detects from the page or falls back to `language` if it names a
     #: code language. Lets a receipt keep a human doc language (e.g. "english")
     #: separate from the SDK code language ("typescript").
-    "code_language":        None,
+    "code_language": None,
     #: Playwright hydration delay before probing for the "Copy as Markdown"
     #: button (ms). Lets a receipt tune late-hydrating docs sites.
-    "js_settle_ms":         None,
-    "last_fetched":         None,
-    "last_output":          None,
+    "js_settle_ms": None,
+    "last_fetched": None,
+    "last_output": None,
 }
 
 
@@ -63,11 +63,17 @@ def _validate_receipt(key: str, receipt: dict) -> list[str]:
         errors.append("'selectors' must be a list")
     elif "selectors" in receipt and not receipt["selectors"]:
         errors.append("'selectors' must not be empty")
-    if "code_language" in receipt and receipt["code_language"] is not None \
-            and not isinstance(receipt["code_language"], str):
+    if (
+        "code_language" in receipt
+        and receipt["code_language"] is not None
+        and not isinstance(receipt["code_language"], str)
+    ):
         errors.append("'code_language' must be a string or null")
-    if "js_settle_ms" in receipt and receipt["js_settle_ms"] is not None \
-            and (not isinstance(receipt["js_settle_ms"], int) or receipt["js_settle_ms"] < 0):
+    if (
+        "js_settle_ms" in receipt
+        and receipt["js_settle_ms"] is not None
+        and (not isinstance(receipt["js_settle_ms"], int) or receipt["js_settle_ms"] < 0)
+    ):
         errors.append("'js_settle_ms' must be a non-negative integer or null")
     return errors
 
@@ -92,12 +98,14 @@ class ReceiptRegistry:
     def _load(self) -> None:
         """Read receipts.json from disk, creating an empty registry if absent."""
         if not self.path.exists():
-            logger.warning("Receipts file not found at %s — starting with empty registry.", self.path)
+            logger.warning(
+                "Receipts file not found at %s — starting with empty registry.", self.path
+            )
             self._data = {}
             return
         try:
             raw = json.loads(self.path.read_text(encoding="utf-8"))
-            receipts_block = raw.get("receipts", raw)   # tolerate bare dict
+            receipts_block = raw.get("receipts", raw)  # tolerate bare dict
             self._data = {k: _normalise_receipt(v) for k, v in receipts_block.items()}
             logger.info("Loaded %d receipt(s) from %s", len(self._data), self.path)
         except json.JSONDecodeError as exc:
@@ -108,9 +116,9 @@ class ReceiptRegistry:
         """Persist in-memory registry to disk, preserving schema_version and comment."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
-            "_comment":        "docparser receipt registry — edit this file to add/update/remove receipts",
+            "_comment": "docparser receipt registry — edit this file to add/update/remove receipts",
             "_schema_version": "2",
-            "receipts":        self._data,
+            "receipts": self._data,
         }
         self.path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
         logger.info("Saved %d receipt(s) to %s", len(self._data), self.path)
@@ -173,10 +181,13 @@ class ReceiptRegistry:
     def mark_fetched(self, key: str, output_filename: str) -> None:
         """Record a successful parse — update last_fetched and last_output."""
         logger.info("Marking receipt '%s' as fetched → %s", key, output_filename)
-        self.update_fields(key, {
-            "last_fetched": date.today().isoformat(),
-            "last_output":  output_filename,
-        })
+        self.update_fields(
+            key,
+            {
+                "last_fetched": date.today().isoformat(),
+                "last_output": output_filename,
+            },
+        )
 
 
 __all__ = [

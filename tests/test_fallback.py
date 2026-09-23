@@ -1,4 +1,5 @@
 """tests/test_fallback.py — score-based content fallback (selectors all miss)."""
+
 from __future__ import annotations
 
 from bs4 import BeautifulSoup
@@ -51,16 +52,20 @@ class TestSelectBestContent:
 
 class TestFallbackInExtract:
     def test_replaces_placeholder_with_recovered_content(self):
-        html = """
+        html = (
+            """
         <html><body>
           <nav><a href="https://x">Jonathan</a><a href="https://y">Martha</a></nav>
           <div class="article-core">
             <h1>Real Docs</h1>
-            <p>""" + "substantive prose " * 60 + """</p>
+            <p>"""
+            + "substantive prose " * 60
+            + """</p>
             <pre><code>pip install thing</code></pre>
           </div>
         </body></html>
         """
+        )
         md = extract_content(_soup(html), dict(MISSING_SELECTORS))
         assert "No content block matched" not in md
         assert "Real Docs" in md
@@ -87,7 +92,9 @@ class TestFallbackInExtract:
         assert "No content block matched" in md
 
     def test_tiny_page_keeps_placeholder(self):
-        md = extract_content(_soup("<html><body><p>tiny</p></body></html>"), dict(MISSING_SELECTORS))
+        md = extract_content(
+            _soup("<html><body><p>tiny</p></body></html>"), dict(MISSING_SELECTORS)
+        )
         assert "No content block matched" in md
 
 
@@ -102,12 +109,14 @@ class TestProbeScoredHint:
         assert findings["scored_selector"] == "div.engine-body"
 
     def test_probe_scored_selector_none_on_empty_page(self):
-        findings = _analyse_probe_soup(BeautifulSoup("<html><body><p>x</p></body></html>", "html.parser"))
+        findings = _analyse_probe_soup(
+            BeautifulSoup("<html><body><p>x</p></body></html>", "html.parser")
+        )
         assert findings["best_selector"] is None
         assert findings["scored_selector"] is None
 
     def test_probe_scored_selector_unset_when_selector_hits(self):
-        html = '<main><h1>Docs</h1><p>body</p></main>'
+        html = "<main><h1>Docs</h1><p>body</p></main>"
         findings = _analyse_probe_soup(BeautifulSoup(html, "html.parser"))
         assert findings["best_selector"] == "main"
         assert findings["scored_selector"] is None

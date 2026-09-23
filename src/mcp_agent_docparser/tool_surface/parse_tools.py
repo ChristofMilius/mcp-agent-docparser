@@ -70,15 +70,19 @@ def register(server, ctx) -> None:
             content = extract_content(soup, template)
             filepath = write_markdown(template, [(url, content)], output_dir)
 
-            return json.dumps({
-                "status": "ok",
-                "template": key,
-                "url": url,
-                "output_dir": str(output_dir),
-                "output_filename": filepath.name,
-                "chars": len(content),
-                "markdown": render_markdown(template, [(url, content)]),
-            }, indent=2, ensure_ascii=False)
+            return json.dumps(
+                {
+                    "status": "ok",
+                    "template": key,
+                    "url": url,
+                    "output_dir": str(output_dir),
+                    "output_filename": filepath.name,
+                    "chars": len(content),
+                    "markdown": render_markdown(template, [(url, content)]),
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
         except Exception as e:
             return tool_error("doc_parse_url", e)
 

@@ -1,4 +1,5 @@
 """tests/test_fetch_js.py — fetch_js session machinery + dispatch (no browser)."""
+
 from __future__ import annotations
 
 import requests

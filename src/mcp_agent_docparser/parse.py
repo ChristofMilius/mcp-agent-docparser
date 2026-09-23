@@ -40,8 +40,8 @@ def parse_receipt(
     if receipt is None:
         return {"status": "not_found", "key": key}
 
-    urls         = receipt.get("urls", [])
-    js_render    = receipt.get("js_render", False)
+    urls = receipt.get("urls", [])
+    js_render = receipt.get("js_render", False)
     js_settle_ms = receipt.get("js_settle_ms")
 
     if not urls:
@@ -49,7 +49,10 @@ def parse_receipt(
 
     logger.info(
         "Parsing %s — %d URL(s), js_render=%s, passthrough=%s",
-        receipt["name"], len(urls), js_render, receipt.get("markdown_passthrough", False),
+        receipt["name"],
+        len(urls),
+        js_render,
+        receipt.get("markdown_passthrough", False),
     )
 
     if dry_run:
@@ -92,9 +95,7 @@ def parse_receipt(
         "name": receipt["name"],
         "output_dir": str(output_dir),
         "output_filename": filepath.name,
-        "sections": [
-            {"url": url, "chars": len(content)} for url, content in sections
-        ],
+        "sections": [{"url": url, "chars": len(content)} for url, content in sections],
         "total_chars": sum(len(content) for _, content in sections),
         "markdown": render_markdown(receipt, sections),
     }

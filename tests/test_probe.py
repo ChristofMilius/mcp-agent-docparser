@@ -1,4 +1,5 @@
 """tests/test_probe.py — probe layer (selector discovery, noise candidates)."""
+
 from __future__ import annotations
 
 from bs4 import BeautifulSoup
@@ -36,6 +37,8 @@ def test_noise_selectors_are_real_css():
 
 
 def test_analyse_no_match_no_noise():
-    findings = _analyse_probe_soup(BeautifulSoup("<html><body><p>x</p></body></html>", "html.parser"))
+    findings = _analyse_probe_soup(
+        BeautifulSoup("<html><body><p>x</p></body></html>", "html.parser")
+    )
     assert findings["best_selector"] is None
     assert findings["noise_candidates"] == []

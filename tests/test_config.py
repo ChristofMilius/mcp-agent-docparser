@@ -1,4 +1,5 @@
 """tests/test_config.py — config path resolution."""
+
 from __future__ import annotations
 
 from mcp_agent_docparser.config import Config, _resolve_path

@@ -1,4 +1,5 @@
 """tests/test_receipts.py — receipt registry CRUD + validation."""
+
 from __future__ import annotations
 
 import json

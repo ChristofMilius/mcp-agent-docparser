@@ -56,16 +56,22 @@ def register(server, ctx) -> None:
         """List the extracted .md files currently in the output directory."""
         try:
             if not output_dir.exists():
-                return json.dumps({"status": "ok", "output_dir": str(output_dir), "files": []}, indent=2)
+                return json.dumps(
+                    {"status": "ok", "output_dir": str(output_dir), "files": []}, indent=2
+                )
             files = []
             for f in sorted(output_dir.glob("*.md")):
                 files.append({"filename": f.name, "bytes": f.stat().st_size})
-            return json.dumps({
-                "status": "ok",
-                "output_dir": str(output_dir),
-                "count": len(files),
-                "files": files,
-            }, indent=2, ensure_ascii=False)
+            return json.dumps(
+                {
+                    "status": "ok",
+                    "output_dir": str(output_dir),
+                    "count": len(files),
+                    "files": files,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
         except Exception as e:
             return tool_error("doc_output", e)
 

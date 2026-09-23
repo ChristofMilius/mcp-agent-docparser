@@ -74,13 +74,19 @@ def _audit(fn: Callable) -> Callable:
         if error is not None:
             base.debug(
                 "[tool %s] raised %s: %s in %.3fs",
-                tool_name, type(error).__name__, _short(str(error)), elapsed,
+                tool_name,
+                type(error).__name__,
+                _short(str(error)),
+                elapsed,
             )
         else:
             rendered = str(result)
             base.debug(
                 "[tool %s] result %d chars in %.3fs: %s",
-                tool_name, len(rendered), elapsed, _short(rendered[:_MAX_RESULT_PREVIEW]),
+                tool_name,
+                len(rendered),
+                elapsed,
+                _short(rendered[:_MAX_RESULT_PREVIEW]),
             )
 
     if inspect.iscoroutinefunction(fn):
