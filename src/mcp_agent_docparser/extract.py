@@ -231,7 +231,86 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
     )
     raw_md = _HEADING_ANCHOR_RE.sub("", raw_md)
     raw_md = _HEADING_SELF_LINK_RE.sub(r"\1\2", raw_md)
+    raw_md = _widen_nested_fences(raw_md)
     return re.sub(r"\n{3,}", "\n\n", raw_md).strip()
+
+
+def _widen_nested_fences(markdown: str) -> str:
+    """
+    Repair nested/fenced code blocks: when a code block's *content* is itself
+    fenced markdown (e.g. a page showing the `` ```mermaid ... ``` `` source),
+    markdownify wraps the whole thing in a fence that an inner `` ``` `` line
+    prematurely closes — CommonMark honours that literal fence line, leaving a
+    bare trailing fence and a broken earlier block.
+
+    For every fence whose body contains a same-char fence-only line (a nested
+    fence that would close the outer block early), widen the outer fence to the
+    longest backtick/tilde run inside the block + 1 so interior fence markers
+    become inert content.
+    """
+    fence_open_re = re.compile(r"^(?P<fence>`{3,}|~{3,})(?P<rest>.*)$")
+    lines = markdown.split("\n")
+    out: list[str] = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        m = fence_open_re.match(line)
+        if not m:
+            out.append(line)
+            i += 1
+            continue
+        fence = m.group("fence")
+        char = fence[0]
+        gate = len(fence)
+        info = m.group("rest").rstrip()
+
+        body: list[str] = []
+        max_run = gate
+        nested = False
+        end = -1  # index of the true closing line (or -1 when unterminated)
+        k = i + 1
+        while k < n:
+            lk = lines[k]
+            fm = fence_open_re.match(lk)
+            same = bool(fm and fm.group("fence")[0] == char and len(fm.group("fence")) >= gate)
+            only = bool(same and not (fm.group("rest").strip() if fm else ""))
+            for part in re.findall(re.escape(char) + "+", lk):
+                max_run = max(max_run, len(part))
+            if only:
+                nxt = lines[k + 1] if k + 1 < n else None
+                nxt_only = False
+                if nxt is not None:
+                    fm2 = fence_open_re.match(nxt)
+                    nxt_only = bool(
+                        fm2
+                        and fm2.group("fence")[0] == char
+                        and len(fm2.group("fence")) >= gate
+                        and not fm2.group("rest").strip()
+                    )
+                if nxt is None or not nxt.strip():
+                    # EOF/blank after → real closer, block ends here.
+                    end = k
+                    break
+                if nxt_only:
+                    # a fence-only line follows → this one is inner content; keep going.
+                    nested = True
+                    body.append(lk)
+                    k += 1
+                    continue
+                # non-fence content follows → this fence-only line is content.
+                nested = True
+            body.append(lk)
+            k += 1
+
+        fence_out = char * (max_run + 1) if nested else fence
+        out.append(f"{fence_out}{info}" if info else fence_out)
+        out.extend(body)
+        if end != -1:
+            out.append(fence_out)
+        i = k + 1
+
+    return "\n".join(out)
 
 
 def _clean_passthrough(text: str) -> str:
@@ -316,6 +395,7 @@ __all__ = [
     "_collapse_pre_blocks",
     "_detect_code_language",
     "_resolve_code_language",
+    "_widen_nested_fences",
     "_TRAILING_CODE_LANGS",
     "select_best_content",
     "css_hint",

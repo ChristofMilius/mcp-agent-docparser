@@ -379,3 +379,54 @@ class TestHeadingAnchorStrip:
         assert "## Use a plugin" in md
         assert "#use-a-plugin" not in md
         assert "body" in md
+
+
+class TestWidenNestedFences:
+    """-- Nested/fenced code blocks (e.g. a page shows a ```mermaid source) --"""
+
+    def _parse(self, html: str) -> str:
+        return extract_content(
+            _soup(html),
+            {
+                "language": "english",
+                "selectors": ["#content"],
+                "strip_tags": [],
+                "section": None,
+                "markdown_passthrough": False,
+            },
+        )
+
+    def test_fenced_markdown_source_is_widened_not_broken(self):
+        # The page's code block *shows* a fenced block: the ```mermaid text is
+        # the content. A 3-backtick outer fence would close on the inner ```.
+        html = (
+            '<div id="content"><pre><code class="language-mermaid">'
+            "```mermaid\ngraph TD;\nA --> Z;\n```"
+            "</code></pre></div>"
+        )
+        md = self._parse(html)
+        assert "````mermaid\n```mermaid\ngraph TD;\nA --> Z;\n```\n````" in md
+        assert "```\n```mermaid" not in md
+
+    def test_normal_code_block_untouched(self):
+        md = self._parse(
+            '<div id="content"><pre><code class="language-python">print("hi")</code></pre></div>'
+        )
+        assert '```python\nprint("hi")\n```' in md
+        assert "````" not in md
+
+    def test_inner_short_fence_lines_untouched(self):
+        # A body line with 1-2 backticks does not close a 3-backtick fence.
+        md = self._parse(
+            '<div id="content"><pre><code class="language-js">const s = "`";\nconst t = "``";</code></pre></div>'
+        )
+        assert '```js\nconst s = "`";\nconst t = "``";\n```' in md
+        assert "````" not in md
+
+    def test_tilde_fence_with_backticks_untouched(self):
+        # ~~~ fences are not closed by ``` lines, so no widening needed.
+        from mcp_agent_docparser.extract import _widen_nested_fences
+
+        assert (
+            _widen_nested_fences("~~~js\nconst x = '```';\n~~~") == "~~~js\nconst x = '```';\n~~~"
+        )
