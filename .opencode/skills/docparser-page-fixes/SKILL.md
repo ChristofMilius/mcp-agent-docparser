@@ -49,6 +49,7 @@ sticks for everyone.
 | Headings polluted by invisible chars — Docusaurus `## Using Skills[​](#using-skills "Direct link to Using Skills")` | Docusaurus marks its heading anchors with a **zero-width space (U+200B)** as link text | same `_HEADING_ANCHOR_RE`, character class extended to `[¶^\u200b]` |
 | Raw copy-markdown page has `\r\n` line endings and trailing `[#use-a-skill]` on headings | Playwright clipboard returns CRLF, and the site ships markdown with anchor-slug tokens | `_clean_passthrough()` → CRLF→LF, rstrip lines, collapse 3+ blank lines, and `_strip_heading_hash_tokens()` drops `[#slug]` **only when** the kebab-case of the line text matches the slug (prose `[#…]` links survive) |
 | Mojibake in static fetches — `BokmÃ¥l`, `YouTubeâ€'s` | `requests .text` decodes with its default ISO-8859-1 when the server sends no `charset=` in Content-Type; UTF-8 bytes get misread as Latin-1 | `_decode_body()` in fetch.py: honor a charset **explicitly declared in the header** (parsed via `_CONTENT_CHARSET_RE`, NOT `get_encoding_from_headers`, which itself defaults to ISO-8859-1), else try strict UTF-8, then `apparent_encoding`, then replacement Latin-1 |
+| Double fence — a bare ` ``` ` wrapping a ` ```mermaid … ``` ` block (Nextra "Markdown" tab, or any page showing fenced source) | the code block's *content is itself fenced markdown*; markdownify wraps the whole thing in a 3-backtick fence and the inner ` ``` ` line **prematurely closes it** under CommonMark, leaving a dangling bare fence. Renders fine in VS Code's lenient viewer, so the wart is easy to miss | `_widen_nested_fences()` in extract.py runs on the markdownify output: scan fence blocks, and when a body line is a **same-char fence-only line** that would close the outer fence, widen the outer fence to the longest backtick/tilde run inside the block + 1 so interior markers become inert content |
 
 ## Diagnosis recipe
 
@@ -83,6 +84,19 @@ Feed that through `extract_content()` with a passthrough receipt and inspect.
   there glues the heading onto the following paragraph.
 - `markdownify(code_language=None)` renders ` ```None ` — pass `""` for a bare
   fence, never `None`.
+- **Fence-widening triggers are precise:** only a **same-char, fence-only** line
+  (`` ``` `` with nothing but whitespace, run ≥ the gate) closes a fence. Body
+  lines with 1–2 backticks (`` ` ``, ```` `` ````) never close a 3-backtick fence; a
+  ` ```mermaid ` info line never closes one either; `~~~` fences are immune to
+  `` ``` `` lines. A fence-only line **followed by non-fence content** is
+  *content* (e.g. shell output showing a fence), not a closer — only the last
+  fence-only line before blank/EOF is the real close. Widen ONLY for genuine
+  nested fences, never on every block.
+- **When a regression test fixes a structural wart, derive the expected string
+  from the actual verified-correct output, not from "what you hope"** — today's
+  first assertion for the nested-fence test omitted the inner ` ``` ` line and
+  the test failed against a *correct* result; the fix was to re-read the real
+  output, not touch the code.
 - **Explicit test-encoding traps:** a hypothetical latin-1 page may not have a
   charset declared; validate against *declared* charsets (header regex), not
   `requests` `.encoding` heuristic, which silently reports ISO-8859-1.
