@@ -47,3 +47,16 @@ def test_fallback_selector_lists_are_populated():
 def test_copy_page_selector_present():
     # Mintlify/Nextra themes label the copy-as-markdown widget "Copy page".
     assert "button:has-text('Copy page')" in fetch_mod._COPY_MD_SELECTORS
+
+
+def test_source_clipboard_is_rejected():
+    reject = fetch_mod._reject_source_clipboard
+    assert reject("") is True
+    assert reject("   \n\t ") is True
+    # YAML frontmatter = raw source written to clipboard (Nextra "Copy page").
+    assert reject("---\nasIndexPage: true\n---\n\n# Advanced") is True
+    # ESM import block = raw source (MDX/MD files).
+    assert reject("import { CloudIcon } from '@components/icons'\n\n# Title") is True
+    # Rendered Markdown must never be rejected.
+    assert reject("# Python SDK\n\nRun `pip install memvid-sdk`.") is False
+    assert reject("## Installation\n\n```python\npip install memvid-sdk\n```") is False

@@ -32,7 +32,8 @@
       "notes": "Mintlify site. Confirmed selector: #content.",
       "last_fetched": null,
       "last_output": null,
-      "code_language": null
+      "code_language": null,
+      "js_settle_ms": null
     },
     "lmstudio-python": {
       "name": "LM Studio Python SDK",
@@ -69,7 +70,8 @@
       "notes": "Custom Next.js site. Static HTML also serves .prose content, but js_render + markdown_passthrough yields the cleanest output via its Copy-as-Markdown button.",
       "last_fetched": null,
       "last_output": null,
-      "code_language": null
+      "code_language": null,
+      "js_settle_ms": null
     },
     "opencode-docs-plugins": {
       "name": "OpenCode Docs - Plugins",
@@ -91,7 +93,8 @@
       "notes": "Probed 2026-09-22: static Astro docs, main selector matches, H2s: Use a plugin / Create a plugin / Examples",
       "last_fetched": "2026-09-22",
       "last_output": "opencode_docs_plugins_20260922_224019.md",
-      "code_language": "typescript"
+      "code_language": "typescript",
+      "js_settle_ms": null
     },
     "requests-quickstart": {
       "name": "Requests Docs - Quickstart",
@@ -109,7 +112,8 @@
       "notes": "Probed 2026-09-22: ReadTheDocs Sphinx theme, [role=main] is the content block, H2s carry a trailing pilcrow (Make a Request, Passing Parameters In URLs, ...)",
       "last_fetched": "2026-09-22",
       "last_output": "requests_docs_quickstart_20260922_222545.md",
-      "code_language": null
+      "code_language": null,
+      "js_settle_ms": null
     },
     "lmstudio-bionic": {
       "name": "LM Studio Bionic Docs",
@@ -134,7 +138,8 @@
       "notes": "Probed 2026-09-22: Bionic docs (Next.js), .prose/article match, Copy-as-Markdown button detected → js_render + markdown_passthrough. Human doc language english, code fences typescript.",
       "code_language": "typescript",
       "last_fetched": "2026-09-22",
-      "last_output": "lm_studio_bionic_docs_20260922_225039.md"
+      "last_output": "lm_studio_bionic_docs_20260922_225039.md",
+      "js_settle_ms": null
     },
     "invidious-docs": {
       "name": "Invidious Docs",
@@ -158,7 +163,8 @@
       "notes": "",
       "code_language": null,
       "last_fetched": "2026-09-22",
-      "last_output": "invidious_docs_20260922_231442.md"
+      "last_output": "invidious_docs_20260922_231442.md",
+      "js_settle_ms": null
     },
     "searxng-docs": {
       "name": "SearXNG Docs",
@@ -184,7 +190,8 @@
       "notes": "",
       "code_language": null,
       "last_fetched": "2026-09-22",
-      "last_output": "searxng_docs_20260922_230843.md"
+      "last_output": "searxng_docs_20260922_230843.md",
+      "js_settle_ms": null
     },
     "hermes-agent-docs": {
       "name": "Hermes Agent Docs",
@@ -208,7 +215,8 @@
       "notes": "",
       "code_language": null,
       "last_fetched": "2026-09-22",
-      "last_output": "hermes_agent_docs_20260922_232143.md"
+      "last_output": "hermes_agent_docs_20260922_232143.md",
+      "js_settle_ms": null
     },
     "mojo-docs": {
       "name": "Mojo Docs",
@@ -232,7 +240,8 @@
       "notes": "Docusaurus site. Manual pages live under Mojo/docs/site/manual/*.mdx in the modular/modular repo. code_language=mojo because markdownify ignores language-* fence classes.",
       "code_language": "mojo",
       "last_fetched": "2026-09-22",
-      "last_output": "mojo_docs_20260922_233037.md"
+      "last_output": "mojo_docs_20260922_233037.md",
+      "js_settle_ms": null
     },
     "rust-docs": {
       "name": "Rust Docs",
@@ -257,7 +266,8 @@
       "notes": "Rust's own docs (doc.rust-lang.org): The Book, Reference, Cargo guide. Selector main/.content. code_language=rust (markdownify ignores language-* classes).",
       "code_language": "rust",
       "last_fetched": "2026-09-22",
-      "last_output": "rust_docs_20260922_233530.md"
+      "last_output": "rust_docs_20260922_233530.md",
+      "js_settle_ms": null
     },
     "mcp-spec": {
       "name": "MCP Specification",
@@ -282,7 +292,8 @@
       "notes": "Official MCP protocol spec (modelcontextprotocol.io, Mintlify-style MDX). Versioned URLs: /specification/<date>/server/tools, /basic/transports, /architecture. Selector #content.",
       "code_language": "json",
       "last_fetched": "2026-09-22",
-      "last_output": "mcp_specification_20260922_234133.md"
+      "last_output": "mcp_specification_20260922_234133.md",
+      "js_settle_ms": null
     },
     "smolagents-docs": {
       "name": "HuggingFace smolagents Docs",
@@ -306,7 +317,8 @@
       "notes": "HF smolagents code-agent framework. HF docs theme (.prose selector). /en/ paths.",
       "code_language": "python",
       "last_fetched": "2026-09-22",
-      "last_output": "huggingface_smolagents_docs_20260922_234109.md"
+      "last_output": "huggingface_smolagents_docs_20260922_234109.md",
+      "js_settle_ms": null
     },
     "pydantic-ai-docs": {
       "name": "Pydantic AI Docs",
@@ -328,7 +340,8 @@
       "notes": "Pydantic AI agent framework (Astro theme, selector main; footer/pagination noise).",
       "code_language": "python",
       "last_fetched": "2026-09-22",
-      "last_output": "pydantic_ai_docs_20260922_234110.md"
+      "last_output": "pydantic_ai_docs_20260922_234110.md",
+      "js_settle_ms": null
     },
     "google-adk-docs": {
       "name": "Google ADK Docs",
@@ -352,7 +365,8 @@
       "notes": "Google Agent Development Kit (Material for MkDocs, selector article; adk.dev canonical).",
       "code_language": "python",
       "last_fetched": "2026-09-22",
-      "last_output": "google_adk_docs_20260922_234109.md"
+      "last_output": "google_adk_docs_20260922_234109.md",
+      "js_settle_ms": null
     },
     "langchain-deepagents": {
       "name": "LangChain DeepAgents Docs",
@@ -377,7 +391,8 @@
       "notes": "LangChain's deepagents (OSS Python). Mintlify MDX theme, selector #content.",
       "code_language": "python",
       "last_fetched": "2026-09-22",
-      "last_output": "langchain_deepagents_docs_20260922_234110.md"
+      "last_output": "langchain_deepagents_docs_20260922_234110.md",
+      "js_settle_ms": null
     },
     "react-dev-docs": {
       "name": "React.dev Learn Docs",
@@ -403,7 +418,61 @@
       "notes": "React.dev tutorial docs. Sandpack embeds multi-file code panels (App.js/index.js) in one pre. Tailwind MDX theme, selector article.",
       "code_language": "jsx",
       "last_fetched": "2026-09-22",
-      "last_output": "react_dev_learn_docs_20260922_234610.md"
+      "last_output": "react_dev_learn_docs_20260922_234610.md",
+      "js_settle_ms": null
+    },
+    "memvid-python-sdk": {
+      "name": "Memvid Python SDK (Mintlify)",
+      "language": "python",
+      "urls": [
+        "https://docs.memvid.com/sdks/python",
+        "https://docs.memvid.com/api-reference"
+      ],
+      "selectors": [
+        "#content",
+        ".prose",
+        "main"
+      ],
+      "strip_tags": [
+        "nav",
+        "header",
+        "footer",
+        "aside"
+      ],
+      "section": null,
+      "js_render": true,
+      "markdown_passthrough": false,
+      "notes": "Phase 3 live-code verification target (Mintlify/MDX).",
+      "code_language": null,
+      "js_settle_ms": 1500,
+      "last_fetched": "2026-09-23",
+      "last_output": "memvid_python_sdk_mintlify_20260923_175811.md"
+    },
+    "nextra-advanced": {
+      "name": "Nextra Advanced Docs",
+      "language": "english",
+      "urls": [
+        "https://nextra.site/docs/advanced"
+      ],
+      "selectors": [
+        "article",
+        "main"
+      ],
+      "strip_tags": [
+        "nav",
+        "header",
+        "footer",
+        "aside",
+        "button"
+      ],
+      "section": null,
+      "js_render": true,
+      "markdown_passthrough": false,
+      "notes": "Phase 3 live-code verification target (Nextra 4).",
+      "code_language": null,
+      "js_settle_ms": 1500,
+      "last_fetched": "2026-09-23",
+      "last_output": "nextra_advanced_docs_20260923_175822.md"
     }
   }
 }

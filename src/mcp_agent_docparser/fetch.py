@@ -25,6 +25,22 @@ _REQUEST_HEADERS = {
     )
 }
 
+#: Regexes that flag clipboard content as raw page *source* rather than
+#: rendered/copyable markdown. Sites sometimes wire "Copy page" to write the
+#: original MDX/MD file — YAML frontmatter and import/JSX blocks give it away.
+#: An empty string never flags.
+_SOURCE_SNIFFERS = [
+    re.compile(r"^\s*---\s*\n", re.MULTILINE),  # YAML frontmatter opener
+    re.compile(r"^\s*import\s+[{\w\"'@\[]", re.MULTILINE),  # ESM/TS imports
+]
+
+
+def _reject_source_clipboard(content: str) -> bool:
+    """True when clipboard text looks like raw source rather than markdown."""
+    if not content or not content.strip():
+        return True  # empty payload is always unusable
+    return any(sniff.search(content) for sniff in _SOURCE_SNIFFERS)
+
 #: Button selectors for the "Copy as Markdown" strategy, tried in order.
 #: Sites label the button differently ("Copy as Markdown", "Copy markdown",
 #: a bare "Markdown", or a data-driven widget). "Copy page" is the common
@@ -256,10 +272,13 @@ def fetch_js(url: str, *, js_settle_ms: int | None = None) -> BeautifulSoup | No
                 button_loc.click()
                 page.wait_for_timeout(800)
                 content = page.evaluate("navigator.clipboard.readText()")
-                if content.strip():
+                if content.strip() and not _reject_source_clipboard(content):
                     logger.info("playwright: clipboard yielded %d chars", len(content))
                     return BeautifulSoup(f"<div><pre>{content}</pre></div>", "html.parser")
-                logger.warning("playwright: clipboard came back empty — falling back to DOM")
+                logger.warning(
+                    "playwright: clipboard unusable (%d chars) — falling back to DOM",
+                    len(content),
+                )
             except Exception as exc:  # noqa: BLE001
                 logger.warning("playwright: copy-markdown failed (%s) — falling back to DOM", exc)
 
