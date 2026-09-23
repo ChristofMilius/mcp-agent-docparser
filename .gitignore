@@ -21,3 +21,7 @@ __pycache__/
 .venv/
 logs/
 doc_output/
+cache/
+cache/
+cache/
+cache/

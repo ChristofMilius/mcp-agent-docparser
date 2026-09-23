@@ -36,6 +36,7 @@ def tmp_project(tmp_path: Path):
         "DOCPARSER_RECEIPTS": str(receipts),
         "DOCPARSER_OUTPUT_DIR": str(root / "doc_output"),
         "DOCPARSER_LOGS_DIR": str(root / "logs"),
+        "DOCPARSER_CACHE_DIR": str(root / "cache"),
     }
     return root, env
 

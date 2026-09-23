@@ -46,6 +46,10 @@ class Config:
         self.logs_dir: Path = _resolve_path(
             os.getenv("DOCPARSER_LOGS_DIR", "logs")
         )
+        self.cache_dir: Path = _resolve_path(
+            os.getenv("DOCPARSER_CACHE_DIR", "cache")
+        )
+        self.cache_ttl_seconds: float = _env_float("DOCPARSER_CACHE_TTL_SECONDS", 0.0)
 
     def __repr__(self) -> str:
         return (
@@ -53,8 +57,21 @@ class Config:
             f"receipts_path={self.receipts_path!r}, "
             f"output_dir={self.output_dir!r}, "
             f"logs_dir={self.logs_dir!r}, "
+            f"cache_dir={self.cache_dir!r}, "
+            f"cache_ttl_seconds={self.cache_ttl_seconds!r}, "
             f")"
         )
+
+
+def _env_float(name: str, default: float) -> float:
+    """Parse a float env var, falling back to `default` on junk values."""
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
 
 
 __all__ = ["Config"]

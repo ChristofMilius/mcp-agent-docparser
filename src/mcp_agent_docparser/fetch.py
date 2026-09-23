@@ -15,6 +15,8 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 
+from mcp_agent_docparser.cache import cache_get, cache_put
+
 logger = logging.getLogger(__name__)
 
 _REQUEST_HEADERS = {
@@ -315,11 +317,19 @@ def fetch_js(url: str, *, js_settle_ms: int | None = None) -> BeautifulSoup | No
 
 def fetch(url: str, js_render: bool = False, js_settle_ms: int | None = None) -> BeautifulSoup | None:
     """Dispatch to the correct fetcher based on the js_render flag."""
+    cached = cache_get(url, js_render)
+    if cached is not None:
+        logger.info("cache-hit  → %s", url)
+        return BeautifulSoup(cached, "html.parser")
     if js_render:
         logger.info("js-render  → %s", url)
-        return fetch_js(url, js_settle_ms=js_settle_ms)
-    logger.info("fetching   → %s", url)
-    return fetch_static(url)
+        soup = fetch_js(url, js_settle_ms=js_settle_ms)
+    else:
+        logger.info("fetching   → %s", url)
+        soup = fetch_static(url)
+    if soup is not None:
+        cache_put(url, js_render, str(soup))
+    return soup
 
 
 __all__ = [

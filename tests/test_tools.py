@@ -55,8 +55,20 @@ class TestServerMeta:
             "receipt_edit", "receipt_delete", "receipt_reload",
             "doc_parse", "doc_parse_url", "doc_crawl",
             "doc_probe", "doc_probe_js", "doc_output",
+            "doc_cache_clear",
         }
         assert expected <= set(tools)
+
+    def test_cache_clear_tool(self, tools, ctx, monkeypatch, tmp_path):
+        cache_dir = tmp_path / "cache"
+        monkeypatch.setenv("DOCPARSER_CACHE_DIR", str(cache_dir))
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        (cache_dir / "deadbeef.json").write_text("{}", encoding="utf-8")
+        out = _parse(tools["doc_cache_clear"]())
+        assert out["status"] == "ok"
+        assert out["removed"] == 1
+        assert out["cache_dir"] == str(cache_dir)
+        assert out["enabled"] is True
 
 
 class TestReceiptTools:

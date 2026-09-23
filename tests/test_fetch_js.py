@@ -25,12 +25,13 @@ def test_shutdown_empty_registry_noop():
     assert set(fetch_mod._JS_SESSIONS) == before
 
 
-def test_static_dispatch_does_not_start_js_session(monkeypatch):
+def test_static_dispatch_does_not_start_js_session(monkeypatch, tmp_path):
     def fake_get(url, headers=None, timeout=None):
         return _html_response(b"<html><body><p>ok</p></body></html>")
 
     baseline = set(fetch_mod._JS_SESSIONS)
     monkeypatch.setattr(fetch_mod.requests, "get", fake_get)
+    monkeypatch.setenv("DOCPARSER_CACHE_DIR", str(tmp_path / "cache"))
     soup = fetch_mod.fetch("http://ex.com/x", js_render=False)
     assert soup is not None
     assert "ok" in soup.get_text()

@@ -49,6 +49,9 @@ sitemaps/robots.txt (same-host link walk as fallback), fetches them
 concurrently, and emits one combined .md. Pass dry_run=true first to list
 the URLs that would be crawled before committing. Crawls never modify the
 registry.
+
+Fetches are cached on disk (cache/) so repeat parses and crawls skip the
+network. Clear the cache with doc_cache_clear after a docs site changes.
 """.strip()
 
 
