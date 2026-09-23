@@ -12,6 +12,7 @@ import logging
 
 from bs4 import BeautifulSoup, Tag
 
+from mcp_agent_docparser.extract import css_hint, select_best_content
 from mcp_agent_docparser.fetch import fetch_static
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,7 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
     misses: list[str] = []
     hit_details: list[dict] = []
     first_match: Tag | None = None
+    scored_selector: str | None = None
 
     for sel in _PROBE_SELECTORS:
         el = soup.select_one(sel)
@@ -77,6 +79,10 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
                 noise.append({"selector": sel, "count": count})
     else:
         logger.warning("No selector matched for probe — page may be JS-rendered.")
+        best = select_best_content(soup)
+        scored_selector = css_hint(best) if best is not None else None
+        if scored_selector is not None:
+            logger.info("scored fallback candidate: %s", scored_selector)
 
     return {
         "hits":             hits,
@@ -86,6 +92,7 @@ def _analyse_probe_soup(soup: BeautifulSoup) -> dict:
         "links":            links,
         "noise_candidates": noise,
         "best_selector":    hits[0] if hits else None,
+        "scored_selector":  scored_selector,
     }
 
 

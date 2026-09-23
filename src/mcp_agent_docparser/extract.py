@@ -44,10 +44,72 @@ _HEADING_SELF_LINK_RE = re.compile(
 #: Trailing heading-anchor token in raw copy-markdown, e.g. "Use a skill [#use-a-skill]".
 _HEADING_HASH_TOKEN_RE = re.compile(r"^(.*?)\s+\[#([\w-]+)\]\s*$", re.MULTILINE)
 
+#: Minimum direct text for a div/section to qualify as a fallback candidate.
+_MIN_CONTENT_CHARS = 200
+
 
 def _to_kebab(text: str) -> str:
     """'Use a skill' → 'use-a-skill' (matches anchor slugs)."""
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+
+
+def _content_score(el: Tag) -> int:
+    """
+    Heuristic content score for the fallback: text length minus link text,
+    plus code-block richness.
+
+    Link text is already counted inside the raw text, so subtracting it twice
+    discounts nav/menu/list boxes. Code blocks are dense signal (docs pages
+    are full of them) and push a block up.
+    """
+    text_chars = len(el.get_text(" ", strip=True))
+    link_chars = sum(len(a.get_text(" ", strip=True)) for a in el.find_all("a"))
+    code_blocks = len(el.find_all("pre"))
+    return text_chars - 2 * link_chars + 150 * code_blocks
+
+
+def select_best_content(soup: BeautifulSoup) -> Tag | None:
+    """
+    Score-based fallback for the selectors walk.
+
+    When no plain CSS selector matches, candidate the page structure itself:
+    semantic content tags (article/main) plus any section/div holding at least
+    `_MIN_CONTENT_CHARS` of text. Rank by `_content_score`; return the winner,
+    or None when nothing convincingly content-like exists.
+    """
+    candidates: list[Tag] = []
+    seen: set[int] = set()
+
+    for selector in ("article", "main", "[role='main']"):
+        el = soup.select_one(selector)
+        if el is not None and id(el) not in seen:
+            seen.add(id(el))
+            candidates.append(el)
+
+    for el in soup.find_all(["section", "div"]):
+        if id(el) in seen:
+            continue
+        if len(el.get_text(" ", strip=True)) < _MIN_CONTENT_CHARS:
+            continue
+        candidates.append(el)
+
+    if not candidates:
+        return None
+
+    best = max(candidates, key=_content_score)
+    if _content_score(best) <= 0:
+        return None
+    return best
+
+
+def css_hint(tag: Tag) -> str:
+    """Best-effort CSS selector hint for a tag: id > first class > tag name."""
+    if tag.get("id"):
+        return f"#{tag['id']}"
+    classes = tag.get("class") or []
+    if classes:
+        return f"{tag.name}.{classes[0]}"
+    return tag.name
 
 
 def _strip_heading_hash_tokens(text: str) -> str:
@@ -88,6 +150,9 @@ def extract_content(soup: BeautifulSoup, receipt: dict) -> str:
         if found:
             content_block = found
             break
+
+    if content_block is None:
+        content_block = select_best_content(soup)
 
     if content_block is None:
         return "_No content block matched any selector for this page._\n"
@@ -219,4 +284,6 @@ __all__ = [
     "_detect_code_language",
     "_resolve_code_language",
     "_TRAILING_CODE_LANGS",
+    "select_best_content",
+    "css_hint",
 ]
