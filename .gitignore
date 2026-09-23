@@ -4,6 +4,7 @@
 !.gitignore
 !pyproject.toml
 !README.md
+!TODO.md
 !LICENSE
 !uv.lock
 !receipts.json
