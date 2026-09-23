@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "MCP server for the docparser pipeline — fetch → extract → emit SDK documentation as clean markdown."
 readme = "README.md"
 authors = [
-    { name = "ChristofMilius" }
+    { name = "Christof Milius" }
 ]
 license = "MIT"
 requires-python = ">=3.13"
